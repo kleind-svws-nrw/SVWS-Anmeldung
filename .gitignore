@@ -1,0 +1,65 @@
+# =========================================================
+# .gitignore – SVWS-Anmeldung (Online-Anmeldebogen MNG)
+# =========================================================
+
+# --- Claude-Dateien ---------------------------------------
+Claude outputs/
+.claude/
+.claude-*
+# CLAUDE.md enthält ggf. Projektanweisungen – bei Bedarf einkommentieren:
+# CLAUDE.md
+
+# --- Quelldokumente (Original-Anmeldebögen, Word/PDF) -----
+quelldokumente/
+
+# --- Datenbank: personenbezogene Anmeldedaten! ------------
+# Nur das leere Verzeichnis (db/.gitkeep) wird versioniert.
+db/*
+!db/.gitkeep
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# --- Lokale Konfiguration / Zugangsdaten ------------------
+# Das Beispiel (config.local.php.example) bleibt im Repo.
+lib/config.local.php
+.env
+.env.*
+!.env.example
+
+# --- Node / Tests -----------------------------------------
+node_modules/
+npm-debug.log*
+yarn-error.log*
+coverage/
+.nyc_output/
+
+# --- PHP / Composer ---------------------------------------
+vendor/
+.phpunit.result.cache
+
+# --- Logs, Exporte, temporäre Dateien ---------------------
+*.log
+logs/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~
+
+# --- Office-Sperrdateien ----------------------------------
+~$*
+.~lock.*#
+
+# --- Betriebssystem ---------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Editoren / IDEs --------------------------------------
+.vscode/
+.idea/
+*.code-workspace

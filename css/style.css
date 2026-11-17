@@ -1,0 +1,64 @@
+/* Bildschirmansicht des Formulars */
+:root { --rand: #c8ccd2; --akzent: #1C2D3A; --kopf: #DCE2E7; --ok: #1d7a3a; --fehler: #b3261e; --text: #232A32; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { font: 15px/1.45 Arial, "Liberation Sans", Helvetica, sans-serif; margin: 0; color: var(--text); background: #f3f5f6; }
+.seitenkopf { max-width: 60rem; margin: 0 auto; padding: 1.2rem 1rem .4rem; display: flex; justify-content: space-between; align-items: center; }
+.seitenkopf .schule { margin: 0; font-weight: bold; font-size: 1.05rem; }
+.seitenkopf h1 { margin: .1rem 0 0; font-size: 1.35rem; }
+main { max-width: 60rem; margin: 0 auto; padding: 0 1rem 3rem; }
+
+fieldset { border: 1.5px solid #000; border-radius: 0; background: #fff; margin: 0 0 1.2rem; padding: 0 1rem 1rem; }
+legend { float: left; width: calc(100% + 2rem); margin: 0 -1rem .9rem; padding: .45rem 1rem; background: var(--kopf);
+         color: var(--akzent); font-weight: bold; text-transform: uppercase; font-size: .85rem; letter-spacing: .02em; border-bottom: 1.5px solid #000; }
+legend + * { clear: both; }
+fieldset.kopf { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: .75rem 1rem; }
+fieldset.kopf legend { grid-column: 1 / -1; }
+
+label { display: flex; flex-direction: column; font-size: .85rem; font-weight: bold; gap: .2rem; }
+input, select, textarea { font: inherit; font-weight: normal; font-size: .95rem; padding: .4rem .5rem; border: 1px solid var(--rand); border-radius: 3px; background: #fff; color: #000; width: 100%; }
+input:focus, select:focus, textarea:focus { outline: 2px solid #4b7bb5; outline-offset: 0; border-color: #4b7bb5; }
+input:disabled { background: #eef0f2; }
+input.kurz { max-width: 8rem; }
+input[type=radio], input[type=checkbox] { width: auto; margin: 0; accent-color: var(--akzent); }
+textarea { resize: vertical; }
+
+.raster { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: .75rem 1rem; margin-bottom: .9rem; }
+.raster .breit { grid-column: 1 / -1; }
+.paar { display: grid; grid-template-columns: 7rem 1fr; gap: .5rem; }
+
+.gruppe { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1.1rem; padding: .6rem 0; border-top: 1px solid #e3e6ea; }
+.gruppe .frage { flex: 1 0 100%; font-weight: bold; font-size: .85rem; }
+.gruppe .frage.lang { font-weight: normal; }
+.gruppe > label { flex-direction: row; align-items: center; gap: .35rem; font-weight: normal; font-size: .92rem; }
+.gruppe > input:not([type]) { flex: 1 1 12rem; width: auto; }
+.gruppe.sekretariat { color: #6f777f; }
+
+.ganztag table { border-collapse: collapse; margin-top: .2rem; flex-basis: 100%; }
+.ganztag th, .ganztag td { padding: .25rem .9rem .25rem 0; font-size: .88rem; text-align: center; }
+.ganztag tbody th { text-align: left; }
+.ganztag td input { transform: scale(1.15); }
+
+.zweispaltig { display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1.5rem; }
+.eb { display: flex; flex-direction: column; gap: .6rem; }
+.eb h3 { margin: 0; font-size: .95rem; }
+.eb .gruppe { border: 0; padding: 0; }
+
+.notfall { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr; gap: .75rem 1rem; }
+@media (max-width: 40rem) { .notfall { grid-template-columns: 1fr; } }
+
+.erklaerung { flex-direction: row; align-items: flex-start; gap: .55rem; font-weight: normal; font-size: .92rem; padding: .6rem 0; border-top: 1px solid #e3e6ea; }
+.erklaerung input { margin-top: .2rem; }
+.hinweis, .fussnote { font-size: .8rem; color: #555c63; font-weight: normal; }
+.fussnote { display: block; flex: 1 0 100%; margin-top: .3rem; }
+
+fieldset.wichtig { background: #F3F5F6; font-size: .9rem; }
+fieldset.wichtig h3 { text-align: center; font-size: .9rem; margin: .5rem 0 .2rem; }
+fieldset.wichtig p { margin: 0 0 .7rem; }
+
+.aktionen { display: flex; gap: .8rem; justify-content: flex-end; flex-wrap: wrap; }
+button { font: inherit; font-weight: bold; padding: .65rem 1.3rem; border: 0; border-radius: 3px; background: var(--akzent); color: #fff; cursor: pointer; }
+button.zweitrangig { background: #fff; color: var(--akzent); border: 1.5px solid var(--akzent); }
+.status:empty { display: none; }
+.status.ok { color: var(--ok); }
+.status.fehler { color: var(--fehler); }

@@ -1,0 +1,6 @@
+<?php
+// Kopieren nach lib/config.local.php und anpassen (wird nicht eingecheckt)
+return [
+    'admin_key' => 'hier-einen-langen-zufaelligen-schluessel-eintragen',
+    'debug'     => false,
+];

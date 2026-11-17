@@ -1,0 +1,14 @@
+{
+  "name": "svws-anmeldung",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Online-Anmeldebogen (EP/MS) – Frontend index.html, Backend api.php, Daten in SQLite (db/)",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "php -S localhost:8080",
+    "db:init": "php lib/init.php",
+    "lint:php": "php -l api.php && php -l lib/db.php && php -l lib/config.php",
+    "test": "node --test tests/*.test.js"
+  }
+}

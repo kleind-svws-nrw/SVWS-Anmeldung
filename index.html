@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anmeldung – Städt. Mathematisch-Naturwissenschaftliches Gymnasium</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/druck.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <header class="seitenkopf">
+    <div>
+      <p class="schule">Städt. Mathematisch-Naturwissenschaftliches Gymnasium</p>
+      <h1>A N M E L D U N G</h1>
+    </div>
+    <img src="img/mng-logo.jpg" alt="MNG-Logo" width="78" height="63">
+  </header>
+
+  <main>
+    <p id="api-status" class="status">Verbindung wird geprüft …</p>
+
+    <form id="anmeldeformular" novalidate>
+      <input type="hidden" name="formular" value="EP">
+
+      <!-- ===================================================== KOPF -->
+      <fieldset class="kopf">
+        <legend>Anmeldung</legend>
+        <label>Jahrgangsstufe*
+          <select name="anmeldung.jahrgangsstufe" required>
+            <option value="5">5 (Anmeldung Klasse 5)</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+          </select>
+        </label>
+        <label>Schuljahr <input name="anmeldung.schuljahr" placeholder="2027/28" pattern="\d{4}/\d{2}"></label>
+        <label>Halbjahr
+          <select name="anmeldung.halbjahr">
+            <option value="">–</option>
+            <option value="1">1. Halbjahr</option>
+            <option value="2">2. Halbjahr</option>
+          </select>
+        </label>
+        <label>Anmeldedatum <input type="date" name="anmeldung.anmeldedatum"></label>
+      </fieldset>
+
+      <!-- ===================================================== SCHÜLER/IN -->
+      <fieldset>
+        <legend>Daten der Schülerin / des Schülers</legend>
+        <div class="raster">
+          <label class="breit">Name* <input name="anmeldung.name" required autocomplete="off"></label>
+          <label>Vorname* <input name="anmeldung.vorname" required autocomplete="off"></label>
+          <label>weitere Vornamen <input name="anmeldung.weitere_vornamen"></label>
+          <label>Straße <input name="anmeldung.strasse"></label>
+          <label>Haus-Nr. <input name="anmeldung.hausnummer" class="kurz"></label>
+          <div class="paar">
+            <label>PLZ <input name="anmeldung.plz" inputmode="numeric" maxlength="5" pattern="\d{5}" class="kurz"></label>
+            <label>Wohnort <input name="anmeldung.wohnort"></label>
+          </div>
+          <label>Ortsteil <input name="anmeldung.ortsteil"></label>
+          <label>Geburtsdatum* <input type="date" name="anmeldung.geburtsdatum" required></label>
+          <label>Geburtsort <input name="anmeldung.geburtsort"></label>
+          <label>Staatsangehörigkeit(en) <input name="anmeldung.staatsangehoerigkeit" placeholder="mehrere mit Komma trennen"></label>
+          <label>Geburtsland <input name="anmeldung.geburtsland"></label>
+        </div>
+
+        <div class="gruppe">
+          <span class="frage">Religionszugehörigkeit</span>
+          <label><input type="radio" name="anmeldung.religion" value="ev"> evangelisch</label>
+          <label><input type="radio" name="anmeldung.religion" value="kath"> katholisch</label>
+          <label><input type="radio" name="anmeldung.religion" value="islam"> islamisch</label>
+          <label><input type="radio" name="anmeldung.religion" value="ohne"> ohne Bekenntnis</label>
+          <label><input type="radio" name="anmeldung.religion" value="sonstige"> sonstige:</label>
+          <input name="anmeldung.religion_sonstige" aria-label="sonstige Religionszugehörigkeit" data-aktiv-wenn="anmeldung.religion=sonstige">
+        </div>
+
+        <div class="gruppe">
+          <span class="frage">Teilnahme am Religionsunterricht</span>
+          <label><input type="radio" name="anmeldung.religionsunterricht" value="ev"> evangelisch</label>
+          <label><input type="radio" name="anmeldung.religionsunterricht" value="kath"> katholisch</label>
+          <label><input type="radio" name="anmeldung.religionsunterricht" value="pp"> Praktische Philosophie</label>
+        </div>
+
+        <div class="gruppe ganztag">
+          <span class="frage">Teilnahmewunsch am Ganztag</span>
+          <label><input type="checkbox" name="ganztag_keine" value="1"> Keine Teilnahme</label>
+          <table id="ganztag-tabelle">
+            <thead><tr><th></th><th>Montag</th><th>Dienstag</th><th>Donnerstag</th></tr></thead>
+            <tbody>
+              <tr><th>MINT</th>
+                <td><input type="checkbox" name="ganztag" value="MINT:Mo" aria-label="MINT Montag"></td>
+                <td><input type="checkbox" name="ganztag" value="MINT:Di" aria-label="MINT Dienstag"></td>
+                <td><input type="checkbox" name="ganztag" value="MINT:Do" aria-label="MINT Donnerstag"></td></tr>
+              <tr><th>Bilingual</th>
+                <td><input type="checkbox" name="ganztag" value="Bilingual:Mo" aria-label="Bilingual Montag"></td>
+                <td><input type="checkbox" name="ganztag" value="Bilingual:Di" aria-label="Bilingual Dienstag"></td>
+                <td><input type="checkbox" name="ganztag" value="Bilingual:Do" aria-label="Bilingual Donnerstag"></td></tr>
+              <tr><th>Hausaufgabenbetreuung</th>
+                <td><input type="checkbox" name="ganztag" value="Hausaufgabenbetreuung:Mo" aria-label="Hausaufgabenbetreuung Montag"></td>
+                <td><input type="checkbox" name="ganztag" value="Hausaufgabenbetreuung:Di" aria-label="Hausaufgabenbetreuung Dienstag"></td>
+                <td><input type="checkbox" name="ganztag" value="Hausaufgabenbetreuung:Do" aria-label="Hausaufgabenbetreuung Donnerstag"></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- nur höhere Jahrgangsstufen. data-nur="EP" = nur Stufe 5, data-nur="MS" = nur Stufen 6–10 (Umschaltung in js/app.js) -->
+        <div class="raster" data-nur="MS" hidden>
+          <label>Fremdsprachenwahl ab Klasse 7 <input name="anmeldung.fremdsprache_ab_7"></label>
+          <label>Wahlpflichtfach ab Klasse 9 <input name="anmeldung.wahlpflichtfach_ab_9"></label>
+        </div>
+
+        <div class="gruppe">
+          <span class="frage">Antrag „Schülerfahrkostenerstattung“ <sup>1)</sup></span>
+          <label><input type="radio" name="anmeldung.fahrkosten_antrag" value="1"> ja</label>
+          <label><input type="radio" name="anmeldung.fahrkosten_antrag" value="0"> nein</label>
+          <small class="fussnote">1) Nach § 5 Abs. 2 SchfkVO NRW entstehen notwendige Schülerfahrkosten, wenn die einfache Entfernung zwischen Wohnung und Schule folgende Grenzen überschreitet: <b>3,5 km bei Sekundarstufe I</b>. Es zählt grundsätzlich der kürzeste Fußweg zur nächstgelegenen Schule der besuchten Schulform.</small>
+        </div>
+
+        <div class="gruppe sekretariat">
+          <span class="frage"><i>Vom Sekretariat auszufüllen → Masernschutznachweis</i></span>
+          <label><input type="radio" name="anmeldung.masernschutz_nachweis" value="1" disabled> ja</label>
+          <label><input type="radio" name="anmeldung.masernschutz_nachweis" value="0" disabled> nein</label>
+        </div>
+
+        <div class="gruppe">
+          <span class="frage">Geschwisterkind ist auch Schulkind am MNG</span>
+          <label><input type="radio" name="anmeldung.geschwisterkind_am_mng" value="1"> ja</label>
+          <label><input type="radio" name="anmeldung.geschwisterkind_am_mng" value="0"> nein</label>
+        </div>
+
+        <label class="erklaerung"><input type="checkbox" name="anmeldung.kenntnis_pflichtveranstaltungen" value="1">
+          Ich habe zur Kenntnis genommen, dass die Teilnahme meines Kindes am Schwimmunterricht und an Klassen- und Studienfahrten verpflichtend ist.</label>
+      </fieldset>
+
+      <!-- ===================================================== ERZIEHUNGSBERECHTIGTE -->
+      <fieldset>
+        <legend>Daten der Erziehungsberechtigten</legend>
+        <div class="zweispaltig">
+          <template id="eb-vorlage">
+            <div class="eb">
+              <h3>Erziehungsberechtigte/r {n}</h3>
+              <div class="gruppe">
+                <label><input type="radio" name="erziehungsberechtigte.{i}.rolle" value="mutter"> Mutter</label>
+                <label><input type="radio" name="erziehungsberechtigte.{i}.rolle" value="vater"> Vater</label>
+                <label><input type="radio" name="erziehungsberechtigte.{i}.rolle" value="sonstige"> sonstige</label>
+              </div>
+              <label>Name <input name="erziehungsberechtigte.{i}.name"></label>
+              <label>Vorname <input name="erziehungsberechtigte.{i}.vorname"></label>
+              <div class="gruppe">
+                <span class="frage">sorgeberechtigt</span>
+                <label><input type="radio" name="erziehungsberechtigte.{i}.sorgeberechtigt" value="1"> ja</label>
+                <label><input type="radio" name="erziehungsberechtigte.{i}.sorgeberechtigt" value="0"> nein</label>
+              </div>
+              <label>Geburtsland <input name="erziehungsberechtigte.{i}.geburtsland"></label>
+              <label><span>Straße <sup>2)</sup></span> <input name="erziehungsberechtigte.{i}.strasse"></label>
+              <label><span>PLZ, Wohnort <sup>2)</sup></span> <input name="erziehungsberechtigte.{i}.plz_wohnort"></label>
+              <label>Telefon <input type="tel" name="erziehungsberechtigte.{i}.telefon"></label>
+              <label>Mobil <input type="tel" name="erziehungsberechtigte.{i}.mobil"></label>
+              <label>Telefon Arbeit <input type="tel" name="erziehungsberechtigte.{i}.telefon_arbeit"></label>
+              <label>E-Mail <input type="email" name="erziehungsberechtigte.{i}.email"></label>
+            </div>
+          </template>
+        </div>
+        <small class="fussnote">2) Nur angeben, falls die Anschrift abweichend von den Angaben der Schülerin/des Schülers ist. Basierend auf § 120 SchulG NRW dienen diese Angaben ausschließlich zur schulischen Kommunikation.</small>
+      </fieldset>
+
+      <!-- ===================================================== NOTFALL -->
+      <fieldset>
+        <legend>Zusätzliche Notfallinformationen</legend>
+        <p class="hinweis">Die folgenden Personen dürfen über die Erziehungsberechtigten hinaus im Notfall (Erkrankung, Unfall etc.) informiert werden und sind dann entscheidungsbefugt:</p>
+        <div class="notfall">
+          <label>Name <input name="notfallkontakte.0.name"></label>
+          <label>Telefon <input type="tel" name="notfallkontakte.0.telefon"></label>
+          <label><span>Status <sup>3)</sup></span> <input name="notfallkontakte.0.status" placeholder="z. B. Großmutter"></label>
+          <label>Name <input name="notfallkontakte.1.name"></label>
+          <label>Telefon <input type="tel" name="notfallkontakte.1.telefon"></label>
+          <label><span>Status <sup>3)</sup></span> <input name="notfallkontakte.1.status" placeholder="z. B. Großvater"></label>
+        </div>
+        <small class="fussnote">3) z. B. Großmutter, Großvater etc.</small>
+      </fieldset>
+
+      <!-- ===================================================== MIGRATION -->
+      <fieldset>
+        <legend>Migrationshintergrund</legend>
+        <div class="gruppe">
+          <span class="frage">Besteht ein Migrationshintergrund?</span>
+          <label><input type="radio" name="anmeldung.migrationshintergrund" value="1"> ja</label>
+          <label><input type="radio" name="anmeldung.migrationshintergrund" value="0"> nein</label>
+        </div>
+        <div class="raster">
+          <label>Geburtsland des Kindes <input name="anmeldung.geburtsland" data-spiegel aria-describedby="spiegel-hinweis"></label>
+          <label>Zuzugsjahr <input name="anmeldung.zuzugsjahr" inputmode="numeric" maxlength="4" pattern="\d{4}" class="kurz"></label>
+          <label>Geburtsland der Mutter <input name="anmeldung.geburtsland_mutter"></label>
+          <label>Geburtsland des Vaters <input name="anmeldung.geburtsland_vater"></label>
+          <label>Muttersprache des Kindes <input name="anmeldung.muttersprache"></label>
+          <label>In der Familie gesprochene Sprache <input name="anmeldung.familiensprache"></label>
+        </div>
+        <small id="spiegel-hinweis" class="fussnote">Das Geburtsland des Kindes ist dasselbe Feld wie oben bei den Schülerdaten.</small>
+      </fieldset>
+
+      <!-- ===================================================== SCHULLAUFBAHN -->
+      <fieldset>
+        <legend>Daten zur Schullaufbahn</legend>
+        <div class="raster">
+          <label>Einschulungsjahr Grundschule <input name="anmeldung.einschulungsjahr" inputmode="numeric" maxlength="4" pattern="\d{4}" class="kurz"></label>
+          <label>Schulform der letzten Schule <input name="anmeldung.letzte_schulform" placeholder="z. B. Grundschule"></label>
+          <label>Entlassjahrgang <input name="anmeldung.entlassjahrgang" class="kurz"></label>
+          <label class="breit">Name der letzten Schule <input name="anmeldung.letzte_schule"></label>
+          <label class="breit">Name der Klassenlehrkraft <input name="anmeldung.klassenlehrkraft"></label>
+        </div>
+        <div class="gruppe">
+          <span class="frage">Übergangsempfehlung</span>
+          <label><input type="radio" name="anmeldung.uebergangsempfehlung" value="GY"> Gymnasium</label>
+          <label><input type="radio" name="anmeldung.uebergangsempfehlung" value="RS_GY_eing"> Realschule/Gymnasium eingeschränkt</label>
+          <label><input type="radio" name="anmeldung.uebergangsempfehlung" value="RS"> Realschule</label>
+          <label><input type="radio" name="anmeldung.uebergangsempfehlung" value="HS_RS_eing"> Hauptschule/Realschule eingeschränkt</label>
+          <label><input type="radio" name="anmeldung.uebergangsempfehlung" value="HS"> Hauptschule</label>
+        </div>
+      </fieldset>
+
+      <!-- ===================================================== WEITERE ANGABEN -->
+      <fieldset>
+        <legend>Weitere Angaben</legend>
+        <div class="gruppe">
+          <span class="frage lang">Ich bin/Wir sind damit einverstanden, dass Fotos aus dem schulischen Leben, auf denen Ihr Kind zu sehen ist, in Veröffentlichungen (z. B. Presseartikel, Schulhomepage) verwendet werden.</span>
+          <label><input type="radio" name="anmeldung.einwilligung_fotos" value="1"> ja</label>
+          <label><input type="radio" name="anmeldung.einwilligung_fotos" value="0"> nein</label>
+        </div>
+        <div class="gruppe">
+          <span class="frage lang">Ich bin/Wir sind damit einverstanden, dass Lehrkräfte mit meinem/unserem Kind digital kommunizieren und Informationen austauschen dürfen.</span>
+          <label><input type="radio" name="anmeldung.einwilligung_digitale_kommunikation" value="1"> ja</label>
+          <label><input type="radio" name="anmeldung.einwilligung_digitale_kommunikation" value="0"> nein</label>
+        </div>
+        <label><span>Sonstige Informationen <sup>4)</sup></span>
+          <textarea name="anmeldung.sonstige_informationen" rows="4" maxlength="600"></textarea>
+        </label>
+        <small class="fussnote">4) z. B. Hinweise auf Behinderungen, gesundheitliche Einschränkungen, Probleme im häuslichen Umfeld</small>
+        <label>Gewünschte Mitschüler*innen / Bemerkungen
+          <textarea name="anmeldung.wunsch_mitschueler" rows="4" maxlength="600"></textarea>
+        </label>
+      </fieldset>
+
+      <!-- ===================================================== ERKLÄRUNGEN -->
+      <fieldset>
+        <legend>Erklärungen</legend>
+        <label class="erklaerung"><input type="checkbox" name="anmeldung.vodv_erhalten" value="1">
+          Einen Papierausdruck der VO-DV I (Verordnung über die zur Verarbeitung zugelassenen Daten von Schülerinnen, Schülern und Eltern) habe ich erhalten.</label>
+        <label class="erklaerung"><input type="checkbox" name="anmeldung.kenntnis_email_webuntis" value="1">
+          Mir ist bewusst, dass schulische Informationen an die angegebenen E-Mail-Adressen übermittelt werden können und ein zusätzliches schulisches Informationssystem (Webuntis) genutzt wird.</label>
+      </fieldset>
+
+      <!-- ===================================================== nur Klasse 5 -->
+      <fieldset data-nur="EP" class="wichtig">
+        <legend>Wichtiger Hinweis</legend>
+        <p>Im Gebiet eines Schulträgers, z. B. der Stadt Mönchengladbach, sollen nach dem Willen des Gesetzgebers Schulleitung, Schulträger und Schulaufsichtsbehörde zusammenarbeiten, um in derselben Schulform auf gleichmäßige Klassenstärken hinzuwirken. Können von einer Schule nicht alle angemeldeten Schüler/innen aufgenommen werden, erfolgt eine Verweisung an diejenigen Schulen, die noch über freie Aufnahmekapazitäten verfügen.</p>
+        <p>Die grundsätzliche Wahlfreiheit der Eltern bezieht sich auf die Auswahl der Schulform; die Voraussetzungen für eine Aufnahme sind durch schulrechtliche Vorgaben konkretisiert. Nähere Erläuterungen finden Sie in der Informationsbroschüre „Allgemeinbildende weiterführende Schulen“. Ein Anspruch auf Aufnahme in eine bestimmte Schule besteht nicht.</p>
+        <h3>Erklärung</h3>
+        <p>Ich bin darüber informiert, dass mit dieser Anmeldung noch nicht über die Aufnahme meines Kindes an dieser Schule entschieden ist. Für den Fall, dass mein Kind an dieser Schule aus Kapazitätsgründen nicht aufgenommen werden kann, bin ich damit einverstanden, dass meine Anmeldung an nachfolgende Wunschschulen weitergeleitet werden:</p>
+        <div class="raster">
+          <label>1. Wunschschule (Name der Schule) <input name="anmeldung.wunschschule_1"></label>
+          <label>2. Wunschschule (Name der Schule) <input name="anmeldung.wunschschule_2"></label>
+        </div>
+        <p>Mir ist bekannt, dass ich ohne Angabe eines Zweitwunsches im Falle einer Nichtaufnahme meines Kindes gemeinsam mit dem „Nichtaufnahmebescheid“ der Schule auch den Anmeldeschein zurückerhalte und eine nochmalige Anmeldung meines Kindes an einer noch aufnahmefähigen Schule vornehmen muss.</p>
+      </fieldset>
+
+      <div class="aktionen">
+        <button type="button" id="drucken" class="zweitrangig">Drucken / PDF</button>
+        <button type="submit">Anmeldung absenden</button>
+      </div>
+      <p id="meldung" class="status" role="status"></p>
+    </form>
+  </main>
+
+  <!-- Druckfassung: wird von js/druck.js aus den Formulardaten erzeugt und nur beim Drucken angezeigt -->
+  <div id="druck" aria-hidden="true"></div>
+</body>
+</html>
