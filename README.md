@@ -25,7 +25,7 @@ Node.js: nur Entwicklungswerkzeug (npm-Skripte, Tests) – läuft nicht auf dem 
 | `js/druck.js` | Erzeugt aus denselben Formulardaten die Druckfassung (3 A4-Seiten, Layout der Word-Vorlagen). |
 | `css/style.css` | Gestaltung der Bildschirmansicht. |
 | `css/druck.css` | Druckfassung (`@media print`, `@page A4`, alle Maße in mm). |
-| `img/mng-logo.jpg` | Logo aus der Word-Vorlage. |
+| `img/logo.png` | Logo aus der Word-Vorlage, weiße Flächen transparent. |
 | `api.php` | Einziger Einstiegspunkt für Datenbankzugriffe (Routing über `?action=`). |
 | `lib/config.php` | Konfiguration; lokale Werte in `lib/config.local.php` (nicht eingecheckt). |
 | `lib/db.php` | PDO-Verbindung, automatische Schema-Anlage/Migration, `insert()` mit Spalten-Whitelist. |
@@ -37,7 +37,7 @@ Node.js: nur Entwicklungswerkzeug (npm-Skripte, Tests) – läuft nicht auf dem 
 
 ## Formular und Druck
 
-- **Fallunterscheidung:** Die Jahrgangsstufe steuert alles. Bei **5** gilt der EP-Bogen (mit „Wichtiger Hinweis“ und Wunschschulen), bei **6–10** der MS-Bogen (mit Fremdsprache ab 7 und Wahlpflichtfach ab 9). Abschnitte mit `data-nur="EP"` (nur Stufe 5) bzw. `data-nur="MS"` (nur Stufen 6–10) werden in `js/app.js` ein-/ausgeblendet; ihre Felder werden dabei deaktiviert und deshalb weder validiert, gespeichert noch gedruckt.
+- **Fallunterscheidung:** Die Jahrgangsstufe steuert alles. Bei **5** gilt der EP-Bogen (mit Einverständniserklärung „Kontakt zur Grundschule“, „Wichtiger Hinweis“ und Wunschschulen), bei **6–10** der MS-Bogen (mit Schulform, Name und Entlassjahrgang der letzten Schule). Feiner nach Stufe (`data-stufen`): Ganztagswunsch nur bei 5–6, Fremdsprachenwahl ab Klasse 7 ab Stufe 7, Wahlpflichtfach ab Klasse 9 ab Stufe 9. Abschnitte mit `data-nur="EP"` (nur Stufe 5) bzw. `data-nur="MS"` (nur Stufen 6–10) werden in `js/app.js` ein-/ausgeblendet; ihre Felder werden dabei deaktiviert und deshalb weder validiert, gespeichert noch gedruckt.
 - **Druck/PDF:** Button „Drucken / PDF“ oder Strg+P. `js/druck.js` baut beim Drucken drei A4-Seiten mit festen Seitenumbrüchen wie in `quelldokumente/`; Eingaben stehen in den Feldern, angekreuzte Optionen als ☒. Ein leeres Formular ergibt einen Blanko-Bogen.
 - **Vorschau ohne Drucken:** `index.html?vorschau` zeigt die Druckseiten am Bildschirm.
 - **Im Druckdialog:** Ränder „Standard“ oder „Keine“ (die Seite setzt selbst 0), *Hintergrundgrafiken* an (für die grauen Abschnittsköpfe), Maßstab 100 %, Kopf-/Fußzeilen des Browsers aus.
@@ -48,12 +48,12 @@ Node.js: nur Entwicklungswerkzeug (npm-Skripte, Tests) – läuft nicht auf dem 
 
 | Tabelle | Inhalt |
 |---|---|
-| `anmeldung` | Kopf, Schülerdaten, Migration, Schullaufbahn, Einwilligungen, EP-/MS-Sonderfelder, `status`, Sekretariatsfelder |
+| `anmeldung` | Kopf, Schülerdaten, Migration, Schullaufbahn, Einwilligungen/Kenntnisnahmen, EP-/MS-Sonderfelder (u. a. `grundschule_kontakt`, `grundschule_hsp`), `status`, Sekretariatsfelder |
 | `erziehungsberechtigter` | bis zu 2 je Anmeldung (`position` 1/2) |
 | `notfallkontakt` | bis zu 2 zusätzliche Kontakte |
-| `ganztag_wunsch` | Angebot (MINT, Bilingual, Hausaufgabenbetreuung) × Tag (Mo, Di, Do) |
+| `ganztag_wunsch` | Angebot × Tag: MINT und Bilingual nur Di, Hausaufgabenbetreuung Mo, Di, Do |
 
-Unterdaten hängen per `ON DELETE CASCADE` an der Anmeldung. Die Schemaversion steht in `PRAGMA user_version`; neue Migrationen kommen in `migrate()` in `lib/db.php`.
+Unterdaten hängen per `ON DELETE CASCADE` an der Anmeldung. Die Schemaversion steht in `PRAGMA user_version`; neue Migrationen kommen in `migrate()` in `lib/db.php`. Schema 2 ergänzt `kenntnis_digitale_kommunikation`, `grundschule_kontakt` und `grundschule_hsp`; die Spalten `einwilligung_digitale_kommunikation` und `kenntnis_email_webuntis` bleiben für Altdaten erhalten, werden vom Formular aber nicht mehr befüllt.
 
 Status-Werte: `eingegangen` → `in_bearbeitung` → `aufgenommen` / `abgelehnt` / `weitergeleitet`.
 

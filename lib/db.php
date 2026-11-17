@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 /**
  * Liefert eine PDO-Verbindung zur SQLite-Datenbank.
@@ -44,8 +44,17 @@ function migrate(PDO $pdo): void
     if ($version >= SCHEMA_VERSION) {
         return;
     }
-    $pdo->exec(file_get_contents(__DIR__ . '/schema.sql'));
-    // Spätere Migrationen hier anhängen: if ($version < 2) { ... }
+    if ($version < 1) {
+        // Neuinstallation: schema.sql enthält bereits den aktuellen Stand
+        $pdo->exec(file_get_contents(__DIR__ . '/schema.sql'));
+    } else {
+        if ($version < 2) {
+            $pdo->exec('ALTER TABLE anmeldung ADD COLUMN kenntnis_digitale_kommunikation INTEGER CHECK (kenntnis_digitale_kommunikation IN (0,1))');
+            $pdo->exec('ALTER TABLE anmeldung ADD COLUMN grundschule_kontakt INTEGER CHECK (grundschule_kontakt IN (0,1))');
+            $pdo->exec('ALTER TABLE anmeldung ADD COLUMN grundschule_hsp INTEGER CHECK (grundschule_hsp IN (0,1))');
+        }
+        // Spätere Migrationen hier anhängen: if ($version < 3) { ... }
+    }
     $pdo->exec('PRAGMA user_version = ' . SCHEMA_VERSION);
 }
 

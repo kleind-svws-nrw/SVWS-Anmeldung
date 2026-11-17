@@ -67,11 +67,16 @@ CREATE TABLE IF NOT EXISTS anmeldung (
 
     -- Weitere Angaben / Erklärungen
     einwilligung_fotos                   INTEGER CHECK (einwilligung_fotos IN (0,1)),
-    einwilligung_digitale_kommunikation  INTEGER CHECK (einwilligung_digitale_kommunikation IN (0,1)),
+    einwilligung_digitale_kommunikation  INTEGER CHECK (einwilligung_digitale_kommunikation IN (0,1)),  -- bis Schema 1, nicht mehr im Formular
+    kenntnis_digitale_kommunikation      INTEGER CHECK (kenntnis_digitale_kommunikation IN (0,1)),      -- Schulmessenger, Päd. Netz, E-Mail
     sonstige_informationen  TEXT,          -- sensibel (Gesundheit u. ä.)
     wunsch_mitschueler      TEXT,
-    vodv_erhalten           INTEGER CHECK (vodv_erhalten IN (0,1)),
-    kenntnis_email_webuntis INTEGER CHECK (kenntnis_email_webuntis IN (0,1)),
+    vodv_erhalten           INTEGER CHECK (vodv_erhalten IN (0,1)),            -- VO-DV I zur Kenntnis genommen
+    kenntnis_email_webuntis INTEGER CHECK (kenntnis_email_webuntis IN (0,1)),  -- bis Schema 1, nicht mehr im Formular
+
+    -- nur Formular EP: Kontakt zur Grundschule
+    grundschule_kontakt     INTEGER CHECK (grundschule_kontakt IN (0,1)),     -- 1 = einverstanden, 0 = ausdrücklich nicht
+    grundschule_hsp         INTEGER CHECK (grundschule_hsp IN (0,1)),         -- Weitergabe Hamburger Schreib-Probe
 
     created_at              TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at              TEXT NOT NULL DEFAULT (datetime('now'))

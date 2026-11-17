@@ -26,7 +26,7 @@ test('gültige Anmeldung wird gespeichert', async () => {
       formular: 'MS',
       anmeldung: { name: 'Test', vorname: 'Tina', geburtsdatum: '2014-05-01', status: 'aufgenommen' },
       erziehungsberechtigte: [{ name: 'Test', vorname: 'Tom', email: 'tom@example.org' }],
-      ganztag: [{ angebot: 'MINT', tag: 'Mo' }],
+      ganztag: [{ angebot: 'MINT', tag: 'Di' }],
     }),
   });
   assert.equal(status, 201);

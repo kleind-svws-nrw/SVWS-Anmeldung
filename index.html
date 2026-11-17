@@ -14,7 +14,7 @@
       <p class="schule">Städt. Mathematisch-Naturwissenschaftliches Gymnasium</p>
       <h1>A N M E L D U N G</h1>
     </div>
-    <img src="img/mng-logo.jpg" alt="MNG-Logo" width="78" height="63">
+    <img src="img/logo.png" alt="MNG-Logo" width="78" height="63">
   </header>
 
   <main>
@@ -26,7 +26,7 @@
       <!-- ===================================================== KOPF -->
       <fieldset class="kopf">
         <legend>Anmeldung</legend>
-        <label>Jahrgangsstufe*
+        <label>Jahrgangsstufe
           <select name="anmeldung.jahrgangsstufe" required>
             <option value="5">5 (Anmeldung Klasse 5)</option>
             <option value="6">6</option>
@@ -39,8 +39,7 @@
         <label>Schuljahr <input name="anmeldung.schuljahr" placeholder="2027/28" pattern="\d{4}/\d{2}"></label>
         <label>Halbjahr
           <select name="anmeldung.halbjahr">
-            <option value="">–</option>
-            <option value="1">1. Halbjahr</option>
+            <option value="1" selected>1. Halbjahr</option>
             <option value="2">2. Halbjahr</option>
           </select>
         </label>
@@ -51,8 +50,8 @@
       <fieldset>
         <legend>Daten der Schülerin / des Schülers</legend>
         <div class="raster">
-          <label class="breit">Name* <input name="anmeldung.name" required autocomplete="off"></label>
-          <label>Vorname* <input name="anmeldung.vorname" required autocomplete="off"></label>
+          <label class="breit">Name <input name="anmeldung.name" required autocomplete="off"></label>
+          <label>Vorname <input name="anmeldung.vorname" required autocomplete="off"></label>
           <label>weitere Vornamen <input name="anmeldung.weitere_vornamen"></label>
           <label>Straße <input name="anmeldung.strasse"></label>
           <label>Haus-Nr. <input name="anmeldung.hausnummer" class="kurz"></label>
@@ -61,7 +60,7 @@
             <label>Wohnort <input name="anmeldung.wohnort"></label>
           </div>
           <label>Ortsteil <input name="anmeldung.ortsteil"></label>
-          <label>Geburtsdatum* <input type="date" name="anmeldung.geburtsdatum" required></label>
+          <label>Geburtsdatum <input type="date" name="anmeldung.geburtsdatum" required></label>
           <label>Geburtsort <input name="anmeldung.geburtsort"></label>
           <label>Staatsangehörigkeit(en) <input name="anmeldung.staatsangehoerigkeit" placeholder="mehrere mit Komma trennen"></label>
           <label>Geburtsland <input name="anmeldung.geburtsland"></label>
@@ -84,20 +83,20 @@
           <label><input type="radio" name="anmeldung.religionsunterricht" value="pp"> Praktische Philosophie</label>
         </div>
 
-        <div class="gruppe ganztag">
+        <div class="gruppe ganztag" data-stufen="5-6">
           <span class="frage">Teilnahmewunsch am Ganztag</span>
           <label><input type="checkbox" name="ganztag_keine" value="1"> Keine Teilnahme</label>
           <table id="ganztag-tabelle">
             <thead><tr><th></th><th>Montag</th><th>Dienstag</th><th>Donnerstag</th></tr></thead>
             <tbody>
               <tr><th>MINT</th>
-                <td><input type="checkbox" name="ganztag" value="MINT:Mo" aria-label="MINT Montag"></td>
+                <td></td>
                 <td><input type="checkbox" name="ganztag" value="MINT:Di" aria-label="MINT Dienstag"></td>
-                <td><input type="checkbox" name="ganztag" value="MINT:Do" aria-label="MINT Donnerstag"></td></tr>
+                <td></td></tr>
               <tr><th>Bilingual</th>
-                <td><input type="checkbox" name="ganztag" value="Bilingual:Mo" aria-label="Bilingual Montag"></td>
+                <td></td>
                 <td><input type="checkbox" name="ganztag" value="Bilingual:Di" aria-label="Bilingual Dienstag"></td>
-                <td><input type="checkbox" name="ganztag" value="Bilingual:Do" aria-label="Bilingual Donnerstag"></td></tr>
+                <td></td></tr>
               <tr><th>Hausaufgabenbetreuung</th>
                 <td><input type="checkbox" name="ganztag" value="Hausaufgabenbetreuung:Mo" aria-label="Hausaufgabenbetreuung Montag"></td>
                 <td><input type="checkbox" name="ganztag" value="Hausaufgabenbetreuung:Di" aria-label="Hausaufgabenbetreuung Dienstag"></td>
@@ -106,10 +105,11 @@
           </table>
         </div>
 
-        <!-- nur höhere Jahrgangsstufen. data-nur="EP" = nur Stufe 5, data-nur="MS" = nur Stufen 6–10 (Umschaltung in js/app.js) -->
-        <div class="raster" data-nur="MS" hidden>
+        <!-- Sichtbarkeit nach Jahrgangsstufe (Umschaltung in js/app.js):
+             data-nur="EP" = nur Stufe 5, data-nur="MS" = Stufen 6–10, data-stufen="7-10" = Stufen 7 bis 10 -->
+        <div class="raster" data-stufen="7-10" hidden>
           <label>Fremdsprachenwahl ab Klasse 7 <input name="anmeldung.fremdsprache_ab_7"></label>
-          <label>Wahlpflichtfach ab Klasse 9 <input name="anmeldung.wahlpflichtfach_ab_9"></label>
+          <label data-stufen="9-10">Wahlpflichtfach ab Klasse 9 <input name="anmeldung.wahlpflichtfach_ab_9"></label>
         </div>
 
         <div class="gruppe">
@@ -190,7 +190,7 @@
           <label><input type="radio" name="anmeldung.migrationshintergrund" value="1"> ja</label>
           <label><input type="radio" name="anmeldung.migrationshintergrund" value="0"> nein</label>
         </div>
-        <div class="raster">
+        <div class="raster" id="migration-details">
           <label>Geburtsland des Kindes <input name="anmeldung.geburtsland" data-spiegel aria-describedby="spiegel-hinweis"></label>
           <label>Zuzugsjahr <input name="anmeldung.zuzugsjahr" inputmode="numeric" maxlength="4" pattern="\d{4}" class="kurz"></label>
           <label>Geburtsland der Mutter <input name="anmeldung.geburtsland_mutter"></label>
@@ -205,10 +205,10 @@
       <fieldset>
         <legend>Daten zur Schullaufbahn</legend>
         <div class="raster">
-          <label>Einschulungsjahr Grundschule <input name="anmeldung.einschulungsjahr" inputmode="numeric" maxlength="4" pattern="\d{4}" class="kurz"></label>
-          <label>Schulform der letzten Schule <input name="anmeldung.letzte_schulform" placeholder="z. B. Grundschule"></label>
-          <label>Entlassjahrgang <input name="anmeldung.entlassjahrgang" class="kurz"></label>
-          <label class="breit">Name der letzten Schule <input name="anmeldung.letzte_schule"></label>
+          <label>Einschulungsjahr Grundschule <input name="anmeldung.einschulungsjahr" inputmode="numeric" maxlength="4" pattern="\d{4}" placeholder="z. B. 2014" data-jahr class="kurz"></label>
+          <label data-nur="MS">Schulform der letzten Schule <input name="anmeldung.letzte_schulform" placeholder="z. B. Grundschule"></label>
+          <label data-nur="MS">Entlassjahrgang <input name="anmeldung.entlassjahrgang" class="kurz"></label>
+          <label class="breit" data-nur="MS">Name der letzten Schule <input name="anmeldung.letzte_schule"></label>
           <label class="breit">Name der Klassenlehrkraft <input name="anmeldung.klassenlehrkraft"></label>
         </div>
         <div class="gruppe">
@@ -229,16 +229,13 @@
           <label><input type="radio" name="anmeldung.einwilligung_fotos" value="1"> ja</label>
           <label><input type="radio" name="anmeldung.einwilligung_fotos" value="0"> nein</label>
         </div>
-        <div class="gruppe">
-          <span class="frage lang">Ich bin/Wir sind damit einverstanden, dass Lehrkräfte mit meinem/unserem Kind digital kommunizieren und Informationen austauschen dürfen.</span>
-          <label><input type="radio" name="anmeldung.einwilligung_digitale_kommunikation" value="1"> ja</label>
-          <label><input type="radio" name="anmeldung.einwilligung_digitale_kommunikation" value="0"> nein</label>
-        </div>
+        <label class="erklaerung"><input type="checkbox" name="anmeldung.kenntnis_digitale_kommunikation" value="1">
+          Ich habe zur Kenntnis genommen, dass Lehrkräfte mit meinem Kind digital kommunizieren und Informationen per Schulmessenger (aktuell WebUntis), über das Pädagogische Netz und per E-Mail austauschen.</label>
         <label><span>Sonstige Informationen <sup>4)</sup></span>
           <textarea name="anmeldung.sonstige_informationen" rows="4" maxlength="600"></textarea>
         </label>
         <small class="fussnote">4) z. B. Hinweise auf Behinderungen, gesundheitliche Einschränkungen, Probleme im häuslichen Umfeld</small>
-        <label>Gewünschte Mitschüler*innen / Bemerkungen
+        <label>Gewünschte Mitschülerinnen oder Mitschüler, weitere Bemerkungen
           <textarea name="anmeldung.wunsch_mitschueler" rows="4" maxlength="600"></textarea>
         </label>
       </fieldset>
@@ -247,15 +244,25 @@
       <fieldset>
         <legend>Erklärungen</legend>
         <label class="erklaerung"><input type="checkbox" name="anmeldung.vodv_erhalten" value="1">
-          Einen Papierausdruck der VO-DV I (Verordnung über die zur Verarbeitung zugelassenen Daten von Schülerinnen, Schülern und Eltern) habe ich erhalten.</label>
-        <label class="erklaerung"><input type="checkbox" name="anmeldung.kenntnis_email_webuntis" value="1">
-          Mir ist bewusst, dass schulische Informationen an die angegebenen E-Mail-Adressen übermittelt werden können und ein zusätzliches schulisches Informationssystem (Webuntis) genutzt wird.</label>
+          Hiermit bestätige ich, dass ich die VO-DV I (Verordnung über die zur Verarbeitung zugelassenen Daten von Schülerinnen, Schülern und Eltern) zur Kenntnis genommen habe.</label>
+      </fieldset>
+
+      <!-- ===================================================== nur Klasse 5: Kontakt zur Grundschule -->
+      <fieldset data-nur="EP" id="grundschule-kontakt">
+        <legend>Einverständniserklärung Kontakt zur Grundschule</legend>
+        <p class="hinweis">Um Ihr Kind bei Bedarf zeitnah fördern zu können, würden wir gerne Kontakt zur Grundschule aufnehmen. Unser Ziel ist es, möglichst schnell und zielgenau mit einer etwaigen Förderung starten zu können, damit der Übergang reibungslos erfolgt. Hierfür benötigen wir Ihre Einverständniserklärung.</p>
+        <label class="erklaerung"><input type="checkbox" name="anmeldung.grundschule_kontakt" value="1">
+          Ich bin damit einverstanden, dass das MathNat-Gymnasium Kontakt zur Grundschule aufnimmt, damit die Förderung meines Kindes möglichst schnell erfolgen kann.</label>
+        <label class="erklaerung"><input type="checkbox" name="anmeldung.grundschule_hsp" value="1">
+          In diesem Zusammenhang darf die Grundschule die Ergebnisse der Hamburger Schreib-Probe (HSP) weitergeben.</label>
+        <label class="erklaerung"><input type="checkbox" name="anmeldung.grundschule_kontakt" value="0">
+          Ich möchte nicht, dass das MathNat-Gymnasium Kontakt zur Grundschule aufnimmt.</label>
       </fieldset>
 
       <!-- ===================================================== nur Klasse 5 -->
       <fieldset data-nur="EP" class="wichtig">
         <legend>Wichtiger Hinweis</legend>
-        <p>Im Gebiet eines Schulträgers, z. B. der Stadt Mönchengladbach, sollen nach dem Willen des Gesetzgebers Schulleitung, Schulträger und Schulaufsichtsbehörde zusammenarbeiten, um in derselben Schulform auf gleichmäßige Klassenstärken hinzuwirken. Können von einer Schule nicht alle angemeldeten Schüler/innen aufgenommen werden, erfolgt eine Verweisung an diejenigen Schulen, die noch über freie Aufnahmekapazitäten verfügen.</p>
+        <p>Im Gebiet eines Schulträgers, z. B. der Stadt Mönchengladbach, sollen nach dem Willen des Gesetzgebers Schulleitung, Schulträger und Schulaufsichtsbehörde zusammenarbeiten, um in derselben Schulform auf gleichmäßige Klassenstärken hinzuwirken. Können von einer Schule nicht alle angemeldeten Schülerinnen und Schüler aufgenommen werden, erfolgt eine Verweisung an diejenigen Schulen, die noch über freie Aufnahmekapazitäten verfügen.</p>
         <p>Die grundsätzliche Wahlfreiheit der Eltern bezieht sich auf die Auswahl der Schulform; die Voraussetzungen für eine Aufnahme sind durch schulrechtliche Vorgaben konkretisiert. Nähere Erläuterungen finden Sie in der Informationsbroschüre „Allgemeinbildende weiterführende Schulen“. Ein Anspruch auf Aufnahme in eine bestimmte Schule besteht nicht.</p>
         <h3>Erklärung</h3>
         <p>Ich bin darüber informiert, dass mit dieser Anmeldung noch nicht über die Aufnahme meines Kindes an dieser Schule entschieden ist. Für den Fall, dass mein Kind an dieser Schule aus Kapazitätsgründen nicht aufgenommen werden kann, bin ich damit einverstanden, dass meine Anmeldung an nachfolgende Wunschschulen weitergeleitet werden:</p>

@@ -30,7 +30,26 @@ form.addEventListener('change', (e) => {
   if (el.name === 'anmeldung.jahrgangsstufe') aktualisiereFormulartyp();
   if (el.name === 'ganztag_keine' || el.name === 'ganztag') aktualisiereGanztag(el);
   if (el.name === 'anmeldung.religion') aktualisiereAbhaengige();
+  if (el.name === 'anmeldung.migrationshintergrund') aktualisiereMigration();
+  if (el.name === 'anmeldung.grundschule_kontakt' || el.name === 'anmeldung.grundschule_hsp') aktualisiereGrundschule(el);
 });
+
+// Jahresfelder (data-jahr, z. B. Einschulungsjahr): vierstellige Jahreszahl, nicht vor 1990 und nicht in der Zukunft
+const JAHR_MIN = 1990;
+function pruefeJahr(feld) {
+  const wert = feld.value.trim();
+  const jahr = Number(wert);
+  const max = new Date().getFullYear();
+  let fehler = '';
+  if (wert !== '' && !/^\d{4}$/.test(wert)) fehler = 'Bitte das Jahr vierstellig angeben, z. B. 2014.';
+  else if (wert !== '' && (jahr < JAHR_MIN || jahr > max)) fehler = `Bitte ein Jahr zwischen ${JAHR_MIN} und ${max} angeben.`;
+  feld.setCustomValidity(fehler);
+  return !fehler;
+}
+for (const feld of form.querySelectorAll('[data-jahr]')) {
+  feld.addEventListener('input', () => pruefeJahr(feld));
+  feld.addEventListener('blur', () => { if (!pruefeJahr(feld)) feld.reportValidity(); });
+}
 
 // Felder, die im Bogen zweimal vorkommen (Geburtsland), synchron halten
 form.addEventListener('input', (e) => {
@@ -44,14 +63,25 @@ form.addEventListener('input', (e) => {
 });
 
 function aktualisiereFormulartyp() {
-  const typ = form.elements['anmeldung.jahrgangsstufe'].value === '5' ? 'EP' : 'MS';
+  const stufe = Number(form.elements['anmeldung.jahrgangsstufe'].value);
+  const typ = stufe === 5 ? 'EP' : 'MS';
   form.elements.formular.value = typ;
-  // Abschnitte des jeweils anderen Bogens ausblenden und ihre Felder deaktivieren:
-  // deaktivierte Felder werden weder validiert noch gespeichert noch gedruckt.
-  for (const abschnitt of form.querySelectorAll('[data-nur]')) {
-    const aus = abschnitt.dataset.nur !== typ;
-    abschnitt.hidden = aus;
-    for (const feld of abschnitt.querySelectorAll('input, select, textarea')) feld.disabled = aus;
+  // Abschnitte ein-/ausblenden:
+  //   data-nur="EP|MS"     → nach Bogen (Stufe 5 bzw. 6–10)
+  //   data-stufen="von-bis" → nach Jahrgangsstufe, z. B. "5-6", "9-10"
+  const bedingt = form.querySelectorAll('[data-nur], [data-stufen]');
+  for (const abschnitt of bedingt) {
+    if (abschnitt.dataset.nur) abschnitt.hidden = abschnitt.dataset.nur !== typ;
+    else {
+      const [von, bis = von] = abschnitt.dataset.stufen.split('-').map(Number);
+      abschnitt.hidden = stufe < von || stufe > bis;
+    }
+  }
+  // Felder in ausgeblendeten Abschnitten deaktivieren: sie werden weder validiert noch gespeichert noch gedruckt.
+  for (const abschnitt of bedingt) {
+    for (const feld of abschnitt.querySelectorAll('input, select, textarea')) {
+      feld.disabled = !!feld.closest('[data-nur][hidden], [data-stufen][hidden]');
+    }
   }
 }
 
@@ -59,7 +89,38 @@ function aktualisiereGanztag(ausloeser) {
   const keine = form.elements.ganztag_keine;
   const tage = [...form.querySelectorAll('input[name="ganztag"]')];
   if (ausloeser === keine && keine.checked) tage.forEach((t) => (t.checked = false));
-  if (ausloeser?.name === 'ganztag' && ausloeser.checked) keine.checked = false;
+  if (ausloeser?.name === 'ganztag' && ausloeser.checked) {
+    keine.checked = false;
+    // Dienstags ist nur ein Angebot möglich (MINT, Bilingual oder Hausaufgabenbetreuung)
+    const tag = ausloeser.value.split(':')[1];
+    if (tag === 'Di') tage.filter((t) => t !== ausloeser && t.value.endsWith(':Di')).forEach((t) => (t.checked = false));
+  }
+}
+
+// Kontakt zur Grundschule (nur Kl. 5): „einverstanden“ und „nicht einverstanden“ schließen sich aus,
+// die HSP-Weitergabe setzt das Einverständnis voraus.
+function aktualisiereGrundschule(ausloeser) {
+  const ja = form.querySelector('input[name="anmeldung.grundschule_kontakt"][value="1"]');
+  const nein = form.querySelector('input[name="anmeldung.grundschule_kontakt"][value="0"]');
+  const hsp = form.elements['anmeldung.grundschule_hsp'];
+  if (!ausloeser.checked) {
+    if (ausloeser === ja) hsp.checked = false;
+    return;
+  }
+  if (ausloeser === nein) ja.checked = hsp.checked = false;
+  else {
+    nein.checked = false;
+    if (ausloeser === hsp) ja.checked = true;
+  }
+}
+
+// Migrationshintergrund „nein“: Detailangaben ausgrauen. Deaktivierte Felder werden nicht gespeichert;
+// das Geburtsland des Kindes kommt dann weiterhin aus den Schülerdaten (gleiches Feld).
+function aktualisiereMigration() {
+  const nein = form.querySelector('input[name="anmeldung.migrationshintergrund"]:checked')?.value === '0';
+  const bereich = document.getElementById('migration-details');
+  bereich.classList.toggle('ausgegraut', nein);
+  for (const feld of bereich.querySelectorAll('input')) feld.disabled = nein;
 }
 
 function aktualisiereAbhaengige() {
@@ -74,6 +135,7 @@ function aktualisiereAbhaengige() {
 aktualisiereFormulartyp();
 if (new URLSearchParams(location.search).has('vorschau')) document.body.classList.add('vorschau');
 aktualisiereAbhaengige();
+aktualisiereMigration();
 
 // ---------------------------------------------------------------- Drucken
 
@@ -129,7 +191,7 @@ export function formularDaten(form) {
     ziel[teile.at(-1)] ??= wert; // doppelte Felder (Geburtsland): erster Wert zählt
   }
 
-  if (form.elements.ganztag_keine.checked) daten.anmeldung.ganztag_teilnahme = '0';
+  if (form.elements.ganztag_keine.checked && !form.elements.ganztag_keine.disabled) daten.anmeldung.ganztag_teilnahme = '0';
   else if (daten.ganztag.length) daten.anmeldung.ganztag_teilnahme = '1';
 
   // Lücken entfernen (z. B. nur EB 2 ausgefüllt), Position bleibt über Index erhalten

@@ -42,6 +42,9 @@ function zeile(hoehe, zellen, klasse = '') {
   return `<div class="z ${klasse}" style="height:${hoehe}mm">${html}</div>`;
 }
 
+/** Ganztagsangebote und die Tage, an denen sie angeboten werden (wie im Formular) */
+const GANZTAG_TAGE = { MINT: ['Di'], Bilingual: ['Di'], Hausaufgabenbetreuung: ['Mo', 'Di', 'Do'] };
+
 const kopf = (titel, hoehe = 7.2, dy = 0) => `<div class="z abschnitt" style="height:${hoehe}mm"><div class="t" style="left:${T.a}mm${dy ? `;margin-top:${dy}mm` : ''}">${titel}</div></div>`;
 const jaNein = (wert, ja = T.f, nein = T.h) => [[ja, `${kb(wert === '1')} <b>ja</b>`], [nein, `${kb(wert === '0')} <b>nein</b>`]];
 
@@ -52,7 +55,7 @@ function seite(nr, inhalt) {
     <header>
       <p class="schule">Städt. Mathematisch-Naturwissenschaftliches Gymnasium</p>
       <p class="titel">A N M E L D U N G</p>
-      <img src="img/mng-logo.jpg" alt="">
+      <img src="img/logo.png" alt="">
     </header>
     ${inhalt}
     <footer>Seite ${nr} von 3</footer>
@@ -61,6 +64,7 @@ function seite(nr, inhalt) {
 
 function tabelleSchueler(d, ms) {
   const a = d.anmeldung;
+  const stufe = Number(a.jahrgangsstufe) || 5;
   const gt = (angebot, tag) => d.ganztag.some((g) => g.angebot === angebot && g.tag === tag);
   const rel = (w) => kb(a.religion === w);
   const ru = (w) => kb(a.religionsunterricht === w);
@@ -78,7 +82,8 @@ function tabelleSchueler(d, ms) {
       [79.3, `${rel('islam')} <b>islamisch</b>`], [97.3, `${rel('ohne')} <b>ohne Bekenntnis</b>`],
       [125.7, `${rel('sonstige')}<span class="linie" style="width:43.4mm">${esc(a.religion_sonstige)}</span>`]]),
     zeile(8.1, [[T.a, `<b>Teilnahme&nbsp; am Religionsunterricht:</b>`], [T.d, `${ru('ev')} <b>evangelisch</b>`], [T.f, `${ru('kath')} <b>katholisch</b>`], [T.h, `${ru('pp')} <b>Praktische Philosophie</b>`]]),
-    `<div class="z ganztag" style="height:19.9mm">
+    // Ganztag nur Stufe 5–6, Fremdsprache ab Stufe 7, Wahlpflichtfach ab Stufe 9 (wie im Formular)
+    stufe > 6 ? '' : `<div class="z ganztag" style="height:19.9mm">
       <div class="t" style="left:${T.a}mm;top:.85mm"><b>Teilnahmewunsch am Ganztag:</b></div>
       <div class="t" style="left:${T.i - 0.38}mm;top:.85mm">${kb(a.ganztag_teilnahme === '0')} <b>Keine Teilnahme</b></div>
       <div class="t" style="left:51.3mm;top:4.45mm"><b>Montag</b></div>
@@ -86,12 +91,11 @@ function tabelleSchueler(d, ms) {
       <div class="t" style="left:101.4mm;top:4.45mm"><b>Donnerstag</b></div>
       ${['MINT', 'Bilingual', 'Hausaufgabenbetreuung'].map((ang, r) => `
         <div class="t" style="left:${T.a}mm;top:${[7.99, 11.25, 14.77][r]}mm"><b>${ang === 'Hausaufgabenbetreuung' ? ang : ang + ':'}</b></div>
-        ${[['Mo', 55.5], ['Di', 81.27], ['Do', 105.42]].map(([tag, x]) => `<div class="t" style="left:${x - 0.6}mm;top:${[7.99, 11.25, 14.77][r]}mm">${kb(gt(ang, tag))}</div>`).join('')}`).join('')}
+        ${[['Mo', 55.5], ['Di', 81.27], ['Do', 105.42]].filter(([tag]) => GANZTAG_TAGE[ang].includes(tag))
+          .map(([tag, x]) => `<div class="t" style="left:${x - 0.6}mm;top:${[7.99, 11.25, 14.77][r]}mm">${kb(gt(ang, tag))}</div>`).join('')}`).join('')}
     </div>`,
-    ...(ms ? [
-      zeile(8.1, [[T.a, lv('Fremdsprachenwahl ab Klasse 7:', a.fremdsprache_ab_7)]]),
-      zeile(7.8, [[T.a, lv('Wahlpflichtfach ab Klasse 9:', a.wahlpflichtfach_ab_9)]]),
-    ] : []),
+    stufe >= 7 ? zeile(8.1, [[T.a, lv('Fremdsprachenwahl ab Klasse 7:', a.fremdsprache_ab_7)]]) : '',
+    stufe >= 9 ? zeile(7.8, [[T.a, lv('Wahlpflichtfach ab Klasse 9:', a.wahlpflichtfach_ab_9)]]) : '',
     zeile(8.2, [[T.a, `<b>Antrag „Schülerfahrkostenerstattung“ ${fn(1)} :</b>`], ...jaNein(a.fahrkosten_antrag)]),
     zeile(8.2, [[T.a, `<b><i>Vom Sekretariat auszufüllen →&nbsp; Masernschutznachweis:</i></b>`],
       [T.f, `${kb(a.masernschutz_nachweis === '1')} <b><i>ja</i></b>`], [T.h, `${kb(a.masernschutz_nachweis === '0')} <b><i>nein</i></b>`]], `sekretariat${ms ? ' grau' : ''}`),
@@ -100,7 +104,7 @@ function tabelleSchueler(d, ms) {
   ].join('');
 }
 
-function tabelleEltern(d, bis) {
+function tabelleEltern(d) {
   const [e1, e2] = d.erziehungsberechtigte;
   const rolle = (e, x1, x2, x3) => [[x1, `${kb(e.rolle === 'mutter')} <b>Mutter</b>`], [x2, `${kb(e.rolle === 'vater')} <b>Vater</b>`], [x3, `${kb(e.rolle === 'sonstige')} <b>sonstige</b>`]];
   const paar = (label, feld) => zeile(8.0, [[T.a, lv(label, e1[feld])], [T.e, lv(label, e2[feld])]]);
@@ -119,7 +123,7 @@ function tabelleEltern(d, bis) {
     paar('Telefon Arbeit:', 'telefon_arbeit'),
     paar('E-Mail:', 'email'),
   ];
-  return bis === 'ohneMail' ? zeilen.slice(0, -1).join('') : zeilen.join('');
+  return zeilen.join('');
 }
 
 function tabelleRest(d, ms) {
@@ -145,8 +149,11 @@ function tabelleRest(d, ms) {
     zeile(8.0, [[T.a, lv('Muttersprache des Kindes:', a.muttersprache)], [T.e, lv('In der Familie gesprochene Sprache:', a.familiensprache)]]),
     kopf('DATEN ZUR SCHULLAUFBAHN', 7.1),
     zeile(7.9, [[T.a, lv('Einschulungsjahr Grundschule:', a.einschulungsjahr)]]),
-    zeile(7.9, [[T.a, lv('Schulform der letzten Schule:', a.letzte_schulform)], [T.f, lv('Entlassjahrgang:', a.entlassjahrgang)]]),
-    zeile(7.9, [[T.a, lv('Name der letzten Schule:', a.letzte_schule)]]),
+    // letzte Schule nur bei Quereinstieg (MS); bei Kl. 5 wird der Platz dem Freitext „Sonstige Informationen“ zugeschlagen
+    ...(ms ? [
+      zeile(7.9, [[T.a, lv('Schulform der letzten Schule:', a.letzte_schulform)], [T.f, lv('Entlassjahrgang:', a.entlassjahrgang)]]),
+      zeile(7.9, [[T.a, lv('Name der letzten Schule:', a.letzte_schule)]]),
+    ] : []),
     zeile(6.4, [[T.a, lv('Name der Klassenlehrkraft:', a.klassenlehrkraft)]]),
     `<div class="z ueberg" style="height:10.7mm">
       <div class="t" style="left:${T.a}mm;top:1.8mm"><b>Übergangsempfehlung:</b></div>
@@ -158,21 +165,33 @@ function tabelleRest(d, ms) {
     </div>`,
     kopf('WEITERE ANGABEN', 7.4),
     einw('Ich bin/Wir sind damit einverstanden, dass Fotos aus dem schulischen Leben, auf denen Ihr Kind zu sehen ist, in Veröffentlichungen (z. B. Presseartikel, Schulhomepage) verwendet werden.', a.einwilligung_fotos),
-    einw('Ich bin/Wir sind damit einverstanden, dass Lehrkräfte mit meinem/unserem Kind digital kommunizieren und Informationen austauschen dürfen.', a.einwilligung_digitale_kommunikation),
+    `<div class="z fliess" style="height:10mm"><p class="normal">${kb(a.kenntnis_digitale_kommunikation === '1')} Ich habe zur Kenntnis genommen, dass Lehrkräfte mit meinem Kind digital kommunizieren und Informationen per Schulmessenger (aktuell WebUntis), über das Pädagogische Netz und per E-Mail austauschen.</p></div>`,
     kopf(`SONSTIGE INFORMATIONEN ${fn(4)}`, 8.0, -0.47),
-    `<div class="z freitext" style="height:${ms ? 54.6 : 33.8}mm"><p>${esc(a.sonstige_informationen)}</p></div>`,
-    kopf('GEWÜNSCHTE MITSCHÜLER*INEN / BEMERKUNGEN', 7.1),
+    `<div class="z freitext" style="height:${ms ? 66.4 : 49.6}mm"><p>${esc(a.sonstige_informationen)}</p></div>`,
+    kopf('GEWÜNSCHTE MITSCHÜLERINNEN ODER MITSCHÜLER, WEITERE BEMERKUNGEN', 7.1),
     ms ? '' : `<div class="z freitext" style="height:36.3mm"><p>${esc(a.wunsch_mitschueler)}</p></div>`,
   ].join('');
 }
 
-function erklaerungen(d, top, ortTop) {
+function erklaerungen(d, top, ortTop, mitGrundschule = false) {
   const a = d.anmeldung;
   return `<div class="erklaerungen" style="top:${top}mm">
-    <p>${kb(a.vodv_erhalten === '1')} Einen Papierausdruck der VO-DV I (Verordnung über die zur Verarbeitung zugelassenen Daten von Schülerinnen, Schülern und Eltern) habe ich erhalten.</p>
-    <p>${kb(a.kenntnis_email_webuntis === '1')} Mir ist bewusst, dass schulische Informationen an die angegebenen E-Mail-Adressen übermittelt werden können und ein zusätzliches schulisches Informationssystem (Webuntis) genutzt wird</p>
+    <p>${kb(a.vodv_erhalten === '1')} Hiermit bestätige ich, dass ich die VO-DV I (Verordnung über die zur Verarbeitung zugelassenen Daten von Schülerinnen, Schülern und Eltern) zur Kenntnis genommen habe.</p>
+    ${mitGrundschule ? grundschule(d) : ''}
   </div>
   ${unterschrift({ top: ortTop, links: 15.5, ortStrich: 21.4, datumX: 37.1, sigX: 74.9, sigBreite: 56.9 })}`;
+}
+
+/** Nur Kl. 5: Einverständnis zur Kontaktaufnahme mit der Grundschule */
+function grundschule(d) {
+  const a = d.anmeldung;
+  return `<div class="grundschule">
+    <p class="titel">Einverständniserklärung Kontakt zur Grundschule</p>
+    <p>Um Ihr Kind bei Bedarf zeitnah fördern zu können, würden wir gerne Kontakt zur Grundschule aufnehmen. Unser Ziel ist es, möglichst schnell und zielgenau mit einer etwaigen Förderung starten zu können, damit der Übergang reibungslos erfolgt. Hierfür benötigen wir Ihre Einverständniserklärung.</p>
+    <p class="kasten">${kb(a.grundschule_kontakt === '1')} Ich bin damit einverstanden, dass das MathNat-Gymnasium Kontakt zur Grundschule aufnimmt, damit die Förderung meines Kindes möglichst schnell erfolgen kann.</p>
+    <p class="kasten">${kb(a.grundschule_hsp === '1')} In diesem Zusammenhang darf die Grundschule die Ergebnisse der Hamburger Schreib-Probe (HSP) weitergeben.</p>
+    <p class="kasten">${kb(a.grundschule_kontakt === '0')} Ich möchte nicht, dass das MathNat-Gymnasium Kontakt zur Grundschule aufnimmt.</p>
+  </div>`;
 }
 
 /** Ort/Datum + Unterschrift. Koordinaten relativ zum umgebenden Element (Seite oder Hinweiskasten). */
@@ -190,7 +209,7 @@ function hinweisEP(d) {
   const wunsch = (nr, wert, top) => `<div class="wunsch" style="top:${top}mm"><span>${nr}.)</span><span class="strich lang">${esc(wert)}</span><div class="unterzeile">Name der Schule</div></div>`;
   return `<div class="hinweis-ep">
     <h2>Wichtiger Hinweis!</h2>
-    <p>Im Gebiet eines Schulträgers, z. B. der Stadt Mönchengladbach, sollen nach dem Willen des Gesetzgebers Schulleitung, Schulträger und Schulaufsichtsbehörde zusammenarbeiten, um in derselben Schulform auf gleichmäßige Klassenstärken hinzuwirken. Können von einer Schule nicht alle angemeldeten Schüler/innen aufgenommen werden, erfolgt eine Verweisung an diejenigen Schulen, die noch über freie Aufnahmekapazitäten verfügen.</p>
+    <p>Im Gebiet eines Schulträgers, z. B. der Stadt Mönchengladbach, sollen nach dem Willen des Gesetzgebers Schulleitung, Schulträger und Schulaufsichtsbehörde zusammenarbeiten, um in derselben Schulform auf gleichmäßige Klassenstärken hinzuwirken. Können von einer Schule nicht alle angemeldeten Schülerinnen und Schüler aufgenommen werden, erfolgt eine Verweisung an diejenigen Schulen, die noch über freie Aufnahmekapazitäten verfügen.</p>
     <p>Die grundsätzliche Wahlfreiheit der Eltern bezieht sich auf die Auswahl der Schulform; die Voraussetzungen für eine Aufnahme sind durch schulrechtliche Vorgaben konkretisiert. Nähere Erläuterungen finden Sie in der Informationsbroschüre „Allgemeinbildende weiterführende Schulen“. Ein Anspruch auf Aufnahme in eine bestimmte Schule besteht nicht.</p>
     <h3>Erklärung</h3>
     <p class="eng">Ich bin darüber informiert, dass mit dieser Anmeldung noch nicht über die Aufnahme meines Kindes an dieser Schule entschieden ist. Für den Fall, dass mein Kind an dieser Schule aus Kapazitätsgründen nicht aufgenommen werden kann, bin ich damit einverstanden, dass meine Anmeldung an nachfolgende Wunschschulen weitergeleitet werden:</p>
@@ -226,15 +245,16 @@ export function druckHtml(daten) {
     return [
       seite(1, `<div class="tabelle">${tabelleSchueler(d, false)}${tabelleEltern(d)}</div>`),
       seite(2, `<div class="tabelle">${tabelleRest(d, false)}</div>`),
-      seite(3, `${erklaerungen(d, 37.3, 75.2)}${hinweisEP(d)}${fussnoten(224.8)}`),
+      seite(3, `${erklaerungen(d, 34.5, 81.3, true)}${hinweisEP(d)}${fussnoten(224.8)}`),
     ].join('');
   }
   return [
-    seite(1, `<div class="tabelle offen-unten">${tabelleSchueler(d, true)}${tabelleEltern(d, 'ohneMail')}</div>`),
-    seite(2, `<div class="tabelle" style="margin-top:-.2mm">${zeile(7.8, [[T.a, lv('E-Mail:', d.erziehungsberechtigte[0].email)], [T.e, lv('E-Mail:', d.erziehungsberechtigte[1].email)]])}</div>
-              <div class="tabelle" style="margin-top:4.0mm">${tabelleRest(d, true)}</div>`),
+    // Ab Stufe 6 entfällt auf Seite 1 immer mindestens ein Block (Ganztag bzw. Fremdsprache/Wahlpflichtfach),
+    // daher passen die Erziehungsberechtigten samt E-Mail vollständig auf Seite 1.
+    seite(1, `<div class="tabelle">${tabelleSchueler(d, true)}${tabelleEltern(d)}</div>`),
+    seite(2, `<div class="tabelle" style="margin-top:-.2mm">${tabelleRest(d, true)}</div>`),
     seite(3, `<div class="tabelle" style="margin-top:-.2mm"><div class="z freitext" style="height:23.4mm"><p>${esc(d.anmeldung.wunsch_mitschueler)}</p></div></div>
-              ${erklaerungen(d, 62.7, 96.16)}${fussnoten(203.13)}`),
+              ${erklaerungen(d, 62.7, 80.5)}${fussnoten(203.13)}`),
   ].join('');
 }
 

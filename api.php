@@ -92,6 +92,18 @@ function anmeldungAnlegen(PDO $pdo, array $in): int
     if (!empty($a['geburtsdatum']) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $a['geburtsdatum'])) {
         $fehler['geburtsdatum'] = 'Format JJJJ-MM-TT';
     }
+    $einschulung = trim((string) ($a['einschulungsjahr'] ?? ''));
+    if ($einschulung !== '') {
+        if (!preg_match('/^\d{4}$/', $einschulung)) {
+            $fehler['einschulungsjahr'] = 'Vierstellige Jahreszahl erwartet, z. B. 2014';
+        } elseif ((int) $einschulung < 1990 || (int) $einschulung > (int) date('Y')) {
+            $fehler['einschulungsjahr'] = 'Jahr zwischen 1990 und ' . date('Y') . ' erwartet';
+        }
+    }
+    $dienstag = array_filter($in['ganztag'] ?? [], fn($g) => ($g['tag'] ?? '') === 'Di');
+    if (count($dienstag) > 1) {
+        $fehler['ganztag'] = 'Dienstags ist nur ein Ganztagsangebot möglich';
+    }
     if ($fehler) {
         throw new ApiError(422, 'Eingaben unvollständig', $fehler);
     }
