@@ -176,7 +176,7 @@ function tabelleRest(d, ms) {
 function erklaerungen(d, top, ortTop, mitGrundschule = false) {
   const a = d.anmeldung;
   return `<div class="erklaerungen" style="top:${top}mm">
-    <p>${kb(a.vodv_erhalten === '1')} Hiermit bestätige ich, dass ich die VO-DV I (Verordnung über die zur Verarbeitung zugelassenen Daten von Schülerinnen, Schülern und Eltern) zur Kenntnis genommen habe.</p>
+    <p>${kb(a.vodv_erhalten === '1')} Hiermit bestätige ich, dass ich die <a href="https://bass.schule.nrw/101.htm">VO-DV I</a> (Verordnung über die zur Verarbeitung zugelassenen Daten von Schülerinnen, Schülern und Eltern) zur Kenntnis genommen habe.</p>
     ${mitGrundschule ? grundschule(d) : ''}
   </div>
   ${unterschrift({ top: ortTop, links: 15.5, ortStrich: 21.4, datumX: 37.1, sigX: 74.9, sigBreite: 56.9 })}`;
