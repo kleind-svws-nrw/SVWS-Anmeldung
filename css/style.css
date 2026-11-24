@@ -33,7 +33,7 @@ textarea { resize: vertical; }
 .gruppe > label { flex-direction: row; align-items: center; gap: .35rem; font-weight: normal; font-size: .92rem; }
 .gruppe > input:not([type]) { flex: 1 1 12rem; width: auto; }
 .gruppe.sekretariat { color: #6f777f; }
-.ausgegraut, .ausgegraut + .fussnote { color: #a3a9af; }
+.ausgegraut, .ausgegraut + .fussnote, .ausgegraut th { color: #a3a9af; }
 
 .ganztag table { border-collapse: collapse; margin-top: .2rem; flex-basis: 100%; }
 .ganztag th, .ganztag td { padding: .25rem .9rem .25rem 0; font-size: .88rem; text-align: center; }

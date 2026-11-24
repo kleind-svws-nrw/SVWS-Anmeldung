@@ -1,5 +1,5 @@
-import { api } from './api.js';
-import { renderDruck } from './druck.js';
+import { api } from './api.js?v=20261124-3';
+import { renderDruck } from './druck.js?v=20261124-3';
 
 const form = document.getElementById('anmeldeformular');
 const meldung = document.getElementById('meldung');
@@ -29,6 +29,7 @@ form.addEventListener('change', (e) => {
   const el = e.target;
   if (el.name === 'anmeldung.jahrgangsstufe') aktualisiereFormulartyp();
   if (el.name === 'ganztag_keine' || el.name === 'ganztag') aktualisiereGanztag(el);
+  if (el.name === 'teilnahme_keine' || el.name === 'anmeldung.teilnahme_mint' || el.name === 'anmeldung.teilnahme_bilingual') aktualisiereTeilnahme(el);
   if (el.name === 'anmeldung.religion') aktualisiereAbhaengige();
   if (el.name === 'anmeldung.migrationshintergrund') aktualisiereMigration();
   if (el.name === 'anmeldung.grundschule_kontakt' || el.name === 'anmeldung.grundschule_hsp') aktualisiereGrundschule(el);
@@ -83,6 +84,26 @@ function aktualisiereFormulartyp() {
       feld.disabled = !!feld.closest('[data-nur][hidden], [data-stufen][hidden]');
     }
   }
+  aktualisiereTeilnahme();
+  aktualisiereGanztag();
+}
+
+// Teilnahme an MINT und/oder Bilingual (Stufe 7–10). Erlaubt sind genau:
+//   MINT | Bilingual | MINT + Bilingual | keine Teilnahme
+// „keine Teilnahme“ entfernt die anderen Haken und graut sie aus; ein Haken bei MINT/Bilingual entfernt „keine Teilnahme“.
+// Solange die Frage sichtbar ist, muss eine der Möglichkeiten gewählt sein.
+function aktualisiereTeilnahme(ausloeser) {
+  const keine = form.elements.teilnahme_keine;
+  const angebote = [form.elements['anmeldung.teilnahme_mint'], form.elements['anmeldung.teilnahme_bilingual']];
+  if (ausloeser && ausloeser !== keine && ausloeser.checked) keine.checked = false;
+  const aus = keine.checked && !keine.disabled;
+  for (const feld of angebote) {
+    if (aus) feld.checked = false;
+    feld.disabled = aus || keine.disabled;
+    feld.closest('label').classList.toggle('ausgegraut', aus);
+  }
+  const fehlt = !keine.disabled && !keine.checked && !angebote.some((f) => f.checked);
+  keine.setCustomValidity(fehlt ? 'Bitte MINT und/oder Bilingual oder „keine Teilnahme“ ankreuzen.' : '');
 }
 
 function aktualisiereGanztag(ausloeser) {
@@ -95,6 +116,13 @@ function aktualisiereGanztag(ausloeser) {
     const tag = ausloeser.value.split(':')[1];
     if (tag === 'Di') tage.filter((t) => t !== ausloeser && t.value.endsWith(':Di')).forEach((t) => (t.checked = false));
   }
+  // „Keine Teilnahme“ graut die Angebotstabelle aus
+  const aus = keine.checked && !keine.disabled;
+  for (const t of tage) {
+    if (aus) t.checked = false;
+    t.disabled = aus || keine.disabled;
+  }
+  document.getElementById('ganztag-tabelle').classList.toggle('ausgegraut', aus);
 }
 
 // Kontakt zur Grundschule (nur Kl. 5): „einverstanden“ und „nicht einverstanden“ schließen sich aus,
@@ -174,7 +202,7 @@ export function formularDaten(form) {
     const wert = (el.value ?? '').trim();
     if (wert === '') continue;
 
-    if (el.name === 'formular' || el.name === 'ganztag_keine') continue;
+    if (el.name === 'formular' || el.name === 'ganztag_keine' || el.name === 'teilnahme_keine') continue;
     if (el.name === 'ganztag') {
       const [angebot, tag] = wert.split(':');
       daten.ganztag.push({ angebot, tag });
@@ -193,6 +221,13 @@ export function formularDaten(form) {
 
   if (form.elements.ganztag_keine.checked && !form.elements.ganztag_keine.disabled) daten.anmeldung.ganztag_teilnahme = '0';
   else if (daten.ganztag.length) daten.anmeldung.ganztag_teilnahme = '1';
+
+  // „keine Teilnahme“ an MINT/Bilingual wird als 0/0 gespeichert (nichts angekreuzt = keine Angabe)
+  const teilnahmeKeine = form.elements.teilnahme_keine;
+  if (teilnahmeKeine.checked && !teilnahmeKeine.disabled) {
+    daten.anmeldung.teilnahme_mint = '0';
+    daten.anmeldung.teilnahme_bilingual = '0';
+  }
 
   // Lücken entfernen (z. B. nur EB 2 ausgefüllt), Position bleibt über Index erhalten
   for (const liste of ['erziehungsberechtigte', 'notfallkontakte']) {

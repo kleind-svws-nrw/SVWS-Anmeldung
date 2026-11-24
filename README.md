@@ -37,7 +37,7 @@ Node.js: nur Entwicklungswerkzeug (npm-Skripte, Tests) – läuft nicht auf dem 
 
 ## Formular und Druck
 
-- **Fallunterscheidung:** Die Jahrgangsstufe steuert alles. Bei **5** gilt der EP-Bogen (mit Einverständniserklärung „Kontakt zur Grundschule“, „Wichtiger Hinweis“ und Wunschschulen), bei **6–10** der MS-Bogen (mit Schulform, Name und Entlassjahrgang der letzten Schule). Feiner nach Stufe (`data-stufen`): Ganztagswunsch nur bei 5–6, Fremdsprachenwahl ab Klasse 7 ab Stufe 7, Wahlpflichtfach ab Klasse 9 ab Stufe 9. Abschnitte mit `data-nur="EP"` (nur Stufe 5) bzw. `data-nur="MS"` (nur Stufen 6–10) werden in `js/app.js` ein-/ausgeblendet; ihre Felder werden dabei deaktiviert und deshalb weder validiert, gespeichert noch gedruckt.
+- **Fallunterscheidung:** Die Jahrgangsstufe steuert alles. Bei **5** gilt der EP-Bogen (mit Einverständniserklärung „Kontakt zur Grundschule“, „Wichtiger Hinweis“ und Wunschschulen), bei **6–10** der MS-Bogen (mit Schulform, Name und Entlassjahrgang der letzten Schule). Feiner nach Stufe (`data-stufen`): Ganztagswunsch nur bei 5–6, Teilnahme an MINT und/oder Bilingual bzw. „keine Teilnahme“ (`teilnahme_mint`, `teilnahme_bilingual`) und Fremdsprachenwahl ab Klasse 7 ab Stufe 7, Wahlpflichtfach ab Klasse 9 ab Stufe 9. Abschnitte mit `data-nur="EP"` (nur Stufe 5) bzw. `data-nur="MS"` (nur Stufen 6–10) werden in `js/app.js` ein-/ausgeblendet; ihre Felder werden dabei deaktiviert und deshalb weder validiert, gespeichert noch gedruckt.
 - **Druck/PDF:** Button „Drucken / PDF“ oder Strg+P. `js/druck.js` baut beim Drucken drei A4-Seiten mit festen Seitenumbrüchen wie in `quelldokumente/`; Eingaben stehen in den Feldern, angekreuzte Optionen als ☒. Ein leeres Formular ergibt einen Blanko-Bogen.
 - **Vorschau ohne Drucken:** `index.html?vorschau` zeigt die Druckseiten am Bildschirm.
 - **Im Druckdialog:** Ränder „Standard“ oder „Keine“ (die Seite setzt selbst 0), *Hintergrundgrafiken* an (für die grauen Abschnittsköpfe), Maßstab 100 %, Kopf-/Fußzeilen des Browsers aus.
@@ -53,7 +53,7 @@ Node.js: nur Entwicklungswerkzeug (npm-Skripte, Tests) – läuft nicht auf dem 
 | `notfallkontakt` | bis zu 2 zusätzliche Kontakte |
 | `ganztag_wunsch` | Angebot × Tag: MINT und Bilingual nur Di, Hausaufgabenbetreuung Mo, Di, Do |
 
-Unterdaten hängen per `ON DELETE CASCADE` an der Anmeldung. Die Schemaversion steht in `PRAGMA user_version`; neue Migrationen kommen in `migrate()` in `lib/db.php`. Schema 2 ergänzt `kenntnis_digitale_kommunikation`, `grundschule_kontakt` und `grundschule_hsp`; die Spalten `einwilligung_digitale_kommunikation` und `kenntnis_email_webuntis` bleiben für Altdaten erhalten, werden vom Formular aber nicht mehr befüllt.
+Unterdaten hängen per `ON DELETE CASCADE` an der Anmeldung. Die Schemaversion steht in `PRAGMA user_version`; neue Migrationen kommen in `migrate()` in `lib/db.php`. Schema 5 ergänzt `kenntnis_elterninfo_messenger`, Schema 4 ergänzt `teilnahme_mint` und `teilnahme_bilingual` (ersetzt die Einfachauswahl `teilnahme_profil` aus Schema 3, die in solchen Datenbanken ungenutzt stehen bleibt), Schema 2 ergänzt `kenntnis_digitale_kommunikation`, `grundschule_kontakt` und `grundschule_hsp`; die Spalten `einwilligung_digitale_kommunikation` und `kenntnis_email_webuntis` bleiben für Altdaten erhalten, werden vom Formular aber nicht mehr befüllt.
 
 Status-Werte: `eingegangen` → `in_bearbeitung` → `aufgenommen` / `abgelehnt` / `weitergeleitet`.
 

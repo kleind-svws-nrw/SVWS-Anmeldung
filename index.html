@@ -4,9 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Anmeldung – Städt. Mathematisch-Naturwissenschaftliches Gymnasium</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/druck.css">
-  <script type="module" src="js/app.js"></script>
+  <!-- ?v=… nach Änderungen an CSS/JS hochzählen (auch die imports in js/app.js), damit Browser keine alten Dateien aus dem Cache nehmen -->
+  <link rel="stylesheet" href="css/style.css?v=20261124-3">
+  <link rel="stylesheet" href="css/druck.css?v=20261124-3">
+  <script type="module" src="js/app.js?v=20261124-3"></script>
 </head>
 <body>
   <header class="seitenkopf">
@@ -107,6 +108,12 @@
 
         <!-- Sichtbarkeit nach Jahrgangsstufe (Umschaltung in js/app.js):
              data-nur="EP" = nur Stufe 5, data-nur="MS" = Stufen 6–10, data-stufen="7-10" = Stufen 7 bis 10 -->
+        <div class="gruppe" data-stufen="7-10" hidden>
+          <span class="frage">Teilnahme an:</span>
+          <label class="teilnahme-angebot"><input type="checkbox" name="anmeldung.teilnahme_mint" value="1"> MINT</label>
+          <label class="teilnahme-angebot"><input type="checkbox" name="anmeldung.teilnahme_bilingual" value="1"> Bilingual</label>
+          <label><input type="checkbox" name="teilnahme_keine" value="1"> keine Teilnahme</label>
+        </div>
         <div class="raster" data-stufen="7-10" hidden>
           <label>Fremdsprachenwahl ab Klasse 7 <input name="anmeldung.fremdsprache_ab_7"></label>
           <label data-stufen="9-10">Wahlpflichtfach ab Klasse 9 <input name="anmeldung.wahlpflichtfach_ab_9"></label>
@@ -231,6 +238,8 @@
         </div>
         <label class="erklaerung"><input type="checkbox" name="anmeldung.kenntnis_digitale_kommunikation" value="1">
           Ich habe zur Kenntnis genommen, dass Lehrkräfte mit meinem Kind digital kommunizieren und Informationen per Schulmessenger (aktuell WebUntis), über das Pädagogische Netz und per E-Mail austauschen.</label>
+        <label class="erklaerung"><input type="checkbox" name="anmeldung.kenntnis_elterninfo_messenger" value="1">
+          Ich habe zur Kenntnis genommen, dass Elterninformationen weitestgehend über den Schulmessenger (aktuell WebUntis) verschickt werden.</label>
         <label><span>Sonstige Informationen <sup>4)</sup></span>
           <textarea name="anmeldung.sonstige_informationen" rows="4" maxlength="600"></textarea>
         </label>

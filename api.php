@@ -92,6 +92,10 @@ function anmeldungAnlegen(PDO $pdo, array $in): int
     if (!empty($a['geburtsdatum']) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $a['geburtsdatum'])) {
         $fehler['geburtsdatum'] = 'Format JJJJ-MM-TT';
     }
+    $stufe = (int) ($a['jahrgangsstufe'] ?? 0);
+    if ($stufe >= 7 && ($a['teilnahme_mint'] ?? '') === '' && ($a['teilnahme_bilingual'] ?? '') === '') {
+        $fehler['teilnahme'] = 'Bitte MINT und/oder Bilingual oder „keine Teilnahme“ angeben';
+    }
     $einschulung = trim((string) ($a['einschulungsjahr'] ?? ''));
     if ($einschulung !== '') {
         if (!preg_match('/^\d{4}$/', $einschulung)) {

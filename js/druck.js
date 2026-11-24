@@ -94,6 +94,7 @@ function tabelleSchueler(d, ms) {
         ${[['Mo', 55.5], ['Di', 81.27], ['Do', 105.42]].filter(([tag]) => GANZTAG_TAGE[ang].includes(tag))
           .map(([tag, x]) => `<div class="t" style="left:${x - 0.6}mm;top:${[7.99, 11.25, 14.77][r]}mm">${kb(gt(ang, tag))}</div>`).join('')}`).join('')}
     </div>`,
+    stufe >= 7 ? zeile(7.8, [[T.a, `<b>Teilnahme an:</b>`], [T.d, `${kb(a.teilnahme_mint === '1')} <b>MINT</b>`], [T.f, `${kb(a.teilnahme_bilingual === '1')} <b>Bilingual</b>`], [T.h, `${kb(a.teilnahme_mint === '0' && a.teilnahme_bilingual === '0')} <b>keine Teilnahme</b>`]]) : '',
     stufe >= 7 ? zeile(8.1, [[T.a, lv('Fremdsprachenwahl ab Klasse 7:', a.fremdsprache_ab_7)]]) : '',
     stufe >= 9 ? zeile(7.8, [[T.a, lv('Wahlpflichtfach ab Klasse 9:', a.wahlpflichtfach_ab_9)]]) : '',
     zeile(8.2, [[T.a, `<b>Antrag „Schülerfahrkostenerstattung“ ${fn(1)} :</b>`], ...jaNein(a.fahrkosten_antrag)]),
@@ -166,8 +167,9 @@ function tabelleRest(d, ms) {
     kopf('WEITERE ANGABEN', 7.4),
     einw('Ich bin/Wir sind damit einverstanden, dass Fotos aus dem schulischen Leben, auf denen Ihr Kind zu sehen ist, in Veröffentlichungen (z. B. Presseartikel, Schulhomepage) verwendet werden.', a.einwilligung_fotos),
     `<div class="z fliess" style="height:10mm"><p class="normal">${kb(a.kenntnis_digitale_kommunikation === '1')} Ich habe zur Kenntnis genommen, dass Lehrkräfte mit meinem Kind digital kommunizieren und Informationen per Schulmessenger (aktuell WebUntis), über das Pädagogische Netz und per E-Mail austauschen.</p></div>`,
+    `<div class="z fliess" style="height:8.6mm"><p class="normal">${kb(a.kenntnis_elterninfo_messenger === '1')} Ich habe zur Kenntnis genommen, dass Elterninformationen weitestgehend über den Schulmessenger (aktuell WebUntis) verschickt werden.</p></div>`,
     kopf(`SONSTIGE INFORMATIONEN ${fn(4)}`, 8.0, -0.47),
-    `<div class="z freitext" style="height:${ms ? 66.4 : 49.6}mm"><p>${esc(a.sonstige_informationen)}</p></div>`,
+    `<div class="z freitext" style="height:${ms ? 57.8 : 41.0}mm"><p>${esc(a.sonstige_informationen)}</p></div>`,
     kopf('GEWÜNSCHTE MITSCHÜLERINNEN ODER MITSCHÜLER, WEITERE BEMERKUNGEN', 7.1),
     ms ? '' : `<div class="z freitext" style="height:36.3mm"><p>${esc(a.wunsch_mitschueler)}</p></div>`,
   ].join('');

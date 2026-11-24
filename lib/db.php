@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 5;
 
 /**
  * Liefert eine PDO-Verbindung zur SQLite-Datenbank.
@@ -53,7 +53,21 @@ function migrate(PDO $pdo): void
             $pdo->exec('ALTER TABLE anmeldung ADD COLUMN grundschule_kontakt INTEGER CHECK (grundschule_kontakt IN (0,1))');
             $pdo->exec('ALTER TABLE anmeldung ADD COLUMN grundschule_hsp INTEGER CHECK (grundschule_hsp IN (0,1))');
         }
-        // Spätere Migrationen hier anhängen: if ($version < 3) { ... }
+        // Schema 3 hatte kurzzeitig eine Einfachauswahl teilnahme_profil; Schema 4 ersetzt sie durch zwei Ja/Nein-Spalten.
+        if ($version < 4) {
+            $pdo->exec('ALTER TABLE anmeldung ADD COLUMN teilnahme_mint INTEGER CHECK (teilnahme_mint IN (0,1))');
+            $pdo->exec('ALTER TABLE anmeldung ADD COLUMN teilnahme_bilingual INTEGER CHECK (teilnahme_bilingual IN (0,1))');
+            if (in_array('teilnahme_profil', columns($pdo, 'anmeldung'), true)) {
+                $pdo->exec("UPDATE anmeldung SET
+                    teilnahme_mint      = CASE teilnahme_profil WHEN 'MINT' THEN 1 ELSE 0 END,
+                    teilnahme_bilingual = CASE teilnahme_profil WHEN 'Bilingual' THEN 1 ELSE 0 END
+                    WHERE teilnahme_profil IS NOT NULL");
+            }
+        }
+        if ($version < 5) {
+            $pdo->exec('ALTER TABLE anmeldung ADD COLUMN kenntnis_elterninfo_messenger INTEGER CHECK (kenntnis_elterninfo_messenger IN (0,1))');
+        }
+        // Spätere Migrationen hier anhängen: if ($version < 6) { ... }
     }
     $pdo->exec('PRAGMA user_version = ' . SCHEMA_VERSION);
 }

@@ -33,6 +33,9 @@ CREATE TABLE IF NOT EXISTS anmeldung (
     religion_sonstige       TEXT,
     religionsunterricht     TEXT CHECK (religionsunterricht IN ('ev','kath','pp')),
     ganztag_teilnahme       INTEGER CHECK (ganztag_teilnahme IN (0,1)),
+    -- nur Stufe 7–10: 1 = nimmt teil; beide 0 = „keine Teilnahme“; NULL = keine Angabe
+    teilnahme_mint          INTEGER CHECK (teilnahme_mint IN (0,1)),
+    teilnahme_bilingual     INTEGER CHECK (teilnahme_bilingual IN (0,1)),
     fahrkosten_antrag       INTEGER CHECK (fahrkosten_antrag IN (0,1)),
     geschwisterkind_am_mng  INTEGER CHECK (geschwisterkind_am_mng IN (0,1)),
     kenntnis_pflichtveranstaltungen INTEGER CHECK (kenntnis_pflichtveranstaltungen IN (0,1)),
@@ -69,6 +72,7 @@ CREATE TABLE IF NOT EXISTS anmeldung (
     einwilligung_fotos                   INTEGER CHECK (einwilligung_fotos IN (0,1)),
     einwilligung_digitale_kommunikation  INTEGER CHECK (einwilligung_digitale_kommunikation IN (0,1)),  -- bis Schema 1, nicht mehr im Formular
     kenntnis_digitale_kommunikation      INTEGER CHECK (kenntnis_digitale_kommunikation IN (0,1)),      -- Schulmessenger, Päd. Netz, E-Mail
+    kenntnis_elterninfo_messenger        INTEGER CHECK (kenntnis_elterninfo_messenger IN (0,1)),        -- Elterninfos über Schulmessenger
     sonstige_informationen  TEXT,          -- sensibel (Gesundheit u. ä.)
     wunsch_mitschueler      TEXT,
     vodv_erhalten           INTEGER CHECK (vodv_erhalten IN (0,1)),            -- VO-DV I zur Kenntnis genommen
