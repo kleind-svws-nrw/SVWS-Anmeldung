@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Verwaltung – Anmeldungen MNG</title>
+  <!-- ?v=… nach Änderungen hochzählen (auch die imports in admin.js) -->
+  <link rel="stylesheet" href="../css/style.css?v=20261127-7">
+  <link rel="stylesheet" href="../css/druck.css?v=20261127-7">
+  <link rel="stylesheet" href="admin.css?v=20261127-7">
+  <script type="module" src="admin.js?v=20261127-7"></script>
+</head>
+<body>
+  <header class="seitenkopf">
+    <div>
+      <p class="schule">Städt. Mathematisch-Naturwissenschaftliches Gymnasium</p>
+      <h1>Verwaltung der Anmeldungen</h1>
+    </div>
+    <a href="../" class="zweitrangig knopf">Zum Anmeldeformular</a>
+  </header>
+
+  <main>
+    <section class="filter" aria-label="Filter">
+      <label>Suche <input type="search" id="suche" placeholder="Name, Vorname, Nr."></label>
+      <label>Schuljahr <select id="f-schuljahr"><option value="">alle</option></select></label>
+      <label>Bogen
+        <select id="f-formular">
+          <option value="">alle</option>
+          <option value="EP">Klasse 5 (EP)</option>
+          <option value="MS">Klasse 6–10 (MS)</option>
+        </select>
+      </label>
+      <label>Status <select id="f-status"><option value="">alle</option></select></label>
+      <button type="button" id="neu-laden" class="zweitrangig">Aktualisieren</button>
+      <button type="button" id="csv" class="zweitrangig">Liste als CSV</button>
+    </section>
+
+    <section class="export" aria-label="SchILD-Export">
+      <strong>SchILD-NRW-Export</strong>
+      <span id="auswahl-anzahl">0 ausgewählt</span>
+      <label>Jahrgang als
+        <select id="jahrgang-format">
+          <option value="zweistellig">05, 06 … 10</option>
+          <option value="einstellig">5, 6 … 10</option>
+          <option value="leer">leer lassen</option>
+        </select>
+      </label>
+      <button type="button" id="schild-export" disabled>Ausgewählte als .dat-Dateien (ZIP)</button>
+    </section>
+
+    <p id="meldung" class="status" role="status"></p>
+    <p id="anzahl" class="anzahl"></p>
+
+    <div class="tabellenrahmen">
+      <table id="liste">
+        <thead>
+          <tr><th class="auswahl"><input type="checkbox" id="alle" aria-label="Alle angezeigten auswählen"></th><th>Nr.</th><th>Name</th><th>Vorname</th><th>Geburtsdatum</th><th>Stufe</th><th>Schuljahr</th><th>Eingang</th><th>Status</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <section id="detail" hidden>
+      <div class="detailkopf">
+        <h2 id="detail-titel"></h2>
+      </div>
+
+      <form id="sekretariat">
+        <fieldset>
+          <legend>Vom Sekretariat auszufüllen</legend>
+          <div class="raster">
+            <label>Status <select name="status"></select></label>
+            <div class="gruppe ohne-linie">
+              <span class="frage">Masernschutznachweis</span>
+              <label><input type="radio" name="masernschutz_nachweis" value="1"> ja</label>
+              <label><input type="radio" name="masernschutz_nachweis" value="0"> nein</label>
+            </div>
+            <label class="breit">Bemerkung des Sekretariats <textarea name="bemerkung_sekretariat" rows="3"></textarea></label>
+          </div>
+          <button type="submit">Speichern</button>
+        </fieldset>
+      </form>
+
+      <div class="vorschau-kopf">
+        <h3 class="vorschau-titel">Anmeldebogen
+          <a id="bearbeiten" class="stift" href="#" title="Anmeldebogen in der Eingabemaske bearbeiten" aria-label="Anmeldebogen bearbeiten">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm17.71-10.21a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            bearbeiten
+          </a>
+        </h3>
+        <div class="aktionen">
+          <button type="button" id="drucken">Bogen drucken / PDF</button>
+          <button type="button" id="loeschen" class="gefahr">Löschen</button>
+          <button type="button" id="schliessen" class="zweitrangig">Schließen</button>
+        </div>
+      </div>
+      <div id="bogen" class="bogen"></div>
+    </section>
+  </main>
+
+  <!-- Druckfassung (nur beim Drucken sichtbar) -->
+  <div id="druck" aria-hidden="true"></div>
+</body>
+</html>

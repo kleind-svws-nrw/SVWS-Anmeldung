@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Anmeldung – Städt. Mathematisch-Naturwissenschaftliches Gymnasium</title>
   <!-- ?v=… nach Änderungen an CSS/JS hochzählen (auch die imports in js/app.js), damit Browser keine alten Dateien aus dem Cache nehmen -->
-  <link rel="stylesheet" href="css/style.css?v=20261124-3">
-  <link rel="stylesheet" href="css/druck.css?v=20261124-3">
-  <script type="module" src="js/app.js?v=20261124-3"></script>
+  <link rel="stylesheet" href="css/style.css?v=20261127-6">
+  <link rel="stylesheet" href="css/druck.css?v=20261127-6">
+  <script type="module" src="js/app.js?v=20261127-6"></script>
 </head>
 <body>
   <header class="seitenkopf">
@@ -53,18 +53,26 @@
         <div class="raster">
           <label class="breit">Name <input name="anmeldung.name" required autocomplete="off"></label>
           <label>Vorname <input name="anmeldung.vorname" required autocomplete="off"></label>
-          <label>weitere Vornamen <input name="anmeldung.weitere_vornamen"></label>
+          <label>weitere Vornamen <input name="anmeldung.weitere_vornamen" data-optional></label>
           <label>Straße <input name="anmeldung.strasse"></label>
           <label>Haus-Nr. <input name="anmeldung.hausnummer" class="kurz"></label>
           <div class="paar">
             <label>PLZ <input name="anmeldung.plz" inputmode="numeric" maxlength="5" pattern="\d{5}" class="kurz"></label>
             <label>Wohnort <input name="anmeldung.wohnort"></label>
           </div>
-          <label>Ortsteil <input name="anmeldung.ortsteil"></label>
+          <label>Ortsteil <input name="anmeldung.ortsteil" data-optional></label>
           <label>Geburtsdatum <input type="date" name="anmeldung.geburtsdatum" required></label>
           <label>Geburtsort <input name="anmeldung.geburtsort"></label>
           <label>Staatsangehörigkeit(en) <input name="anmeldung.staatsangehoerigkeit" placeholder="mehrere mit Komma trennen"></label>
           <label>Geburtsland <input name="anmeldung.geburtsland"></label>
+        </div>
+
+        <div class="gruppe">
+          <span class="frage">Geschlecht</span>
+          <label><input type="radio" name="anmeldung.geschlecht" value="m"> männlich</label>
+          <label><input type="radio" name="anmeldung.geschlecht" value="w"> weiblich</label>
+          <label><input type="radio" name="anmeldung.geschlecht" value="d"> divers</label>
+          <label><input type="radio" name="anmeldung.geschlecht" value="x"> ohne Angabe</label>
         </div>
 
         <div class="gruppe">
@@ -138,7 +146,7 @@
           <label><input type="radio" name="anmeldung.geschwisterkind_am_mng" value="0"> nein</label>
         </div>
 
-        <label class="erklaerung"><input type="checkbox" name="anmeldung.kenntnis_pflichtveranstaltungen" value="1">
+        <label class="erklaerung"><input type="checkbox" name="anmeldung.kenntnis_pflichtveranstaltungen" value="1" required>
           Ich habe zur Kenntnis genommen, dass die Teilnahme meines Kindes am Schwimmunterricht und an Klassen- und Studienfahrten verpflichtend ist.</label>
       </fieldset>
 
@@ -162,12 +170,12 @@
                 <label><input type="radio" name="erziehungsberechtigte.{i}.sorgeberechtigt" value="0"> nein</label>
               </div>
               <label>Geburtsland <input name="erziehungsberechtigte.{i}.geburtsland"></label>
-              <label><span>Straße <sup>2)</sup></span> <input name="erziehungsberechtigte.{i}.strasse"></label>
-              <label><span>PLZ, Wohnort <sup>2)</sup></span> <input name="erziehungsberechtigte.{i}.plz_wohnort"></label>
-              <label>Telefon <input type="tel" name="erziehungsberechtigte.{i}.telefon"></label>
-              <label>Mobil <input type="tel" name="erziehungsberechtigte.{i}.mobil"></label>
-              <label>Telefon Arbeit <input type="tel" name="erziehungsberechtigte.{i}.telefon_arbeit"></label>
-              <label>E-Mail <input type="email" name="erziehungsberechtigte.{i}.email"></label>
+              <label><span>Straße <sup>2)</sup></span> <input name="erziehungsberechtigte.{i}.strasse" data-optional></label>
+              <label><span>PLZ, Wohnort <sup>2)</sup></span> <input name="erziehungsberechtigte.{i}.plz_wohnort" data-optional></label>
+              <label>Telefon <input type="tel" name="erziehungsberechtigte.{i}.telefon" data-optional></label>
+              <label>Mobil <input type="tel" name="erziehungsberechtigte.{i}.mobil" data-optional></label>
+              <label>Telefon Arbeit <input type="tel" name="erziehungsberechtigte.{i}.telefon_arbeit" data-optional></label>
+              <label>E-Mail <input type="email" name="erziehungsberechtigte.{i}.email" data-optional></label>
             </div>
           </template>
         </div>
@@ -175,7 +183,7 @@
       </fieldset>
 
       <!-- ===================================================== NOTFALL -->
-      <fieldset>
+      <fieldset data-optional>
         <legend>Zusätzliche Notfallinformationen</legend>
         <p class="hinweis">Die folgenden Personen dürfen über die Erziehungsberechtigten hinaus im Notfall (Erkrankung, Unfall etc.) informiert werden und sind dann entscheidungsbefugt:</p>
         <div class="notfall">
@@ -213,13 +221,13 @@
         <legend>Daten zur Schullaufbahn</legend>
         <div class="raster">
           <label>Einschulungsjahr Grundschule <input name="anmeldung.einschulungsjahr" inputmode="numeric" maxlength="4" pattern="\d{4}" placeholder="z. B. 2014" data-jahr class="kurz"></label>
+          <label>Name der letzten Schule <input name="anmeldung.letzte_schule"></label>
           <label data-nur="MS">Schulform der letzten Schule <input name="anmeldung.letzte_schulform" placeholder="z. B. Grundschule"></label>
           <label data-nur="MS">Entlassjahrgang <input name="anmeldung.entlassjahrgang" class="kurz"></label>
-          <label class="breit" data-nur="MS">Name der letzten Schule <input name="anmeldung.letzte_schule"></label>
           <label class="breit">Name der Klassenlehrkraft <input name="anmeldung.klassenlehrkraft"></label>
         </div>
         <div class="gruppe">
-          <span class="frage">Übergangsempfehlung</span>
+          <span class="frage">Übergangsempfehlung der Grundschule</span>
           <label><input type="radio" name="anmeldung.uebergangsempfehlung" value="GY"> Gymnasium</label>
           <label><input type="radio" name="anmeldung.uebergangsempfehlung" value="RS_GY_eing"> Realschule/Gymnasium eingeschränkt</label>
           <label><input type="radio" name="anmeldung.uebergangsempfehlung" value="RS"> Realschule</label>
@@ -236,23 +244,23 @@
           <label><input type="radio" name="anmeldung.einwilligung_fotos" value="1"> ja</label>
           <label><input type="radio" name="anmeldung.einwilligung_fotos" value="0"> nein</label>
         </div>
-        <label class="erklaerung"><input type="checkbox" name="anmeldung.kenntnis_digitale_kommunikation" value="1">
+        <label class="erklaerung"><input type="checkbox" name="anmeldung.kenntnis_digitale_kommunikation" value="1" required>
           Ich habe zur Kenntnis genommen, dass Lehrkräfte mit meinem Kind digital kommunizieren und Informationen per Schulmessenger (aktuell WebUntis), über das Pädagogische Netz und per E-Mail austauschen.</label>
-        <label class="erklaerung"><input type="checkbox" name="anmeldung.kenntnis_elterninfo_messenger" value="1">
+        <label class="erklaerung"><input type="checkbox" name="anmeldung.kenntnis_elterninfo_messenger" value="1" required>
           Ich habe zur Kenntnis genommen, dass Elterninformationen weitestgehend über den Schulmessenger (aktuell WebUntis) verschickt werden.</label>
         <label><span>Sonstige Informationen <sup>4)</sup></span>
-          <textarea name="anmeldung.sonstige_informationen" rows="4" maxlength="600"></textarea>
+          <textarea name="anmeldung.sonstige_informationen" rows="4" maxlength="600" data-optional></textarea>
         </label>
-        <small class="fussnote">4) z. B. Hinweise auf Behinderungen, gesundheitliche Einschränkungen, Probleme im häuslichen Umfeld</small>
+        <small class="fussnote">4) z. B. Hinweise auf Behinderungen, Förderbedarf, gesundheitliche Einschränkungen, Probleme im häuslichen Umfeld</small>
         <label>Gewünschte Mitschülerinnen oder Mitschüler, weitere Bemerkungen
-          <textarea name="anmeldung.wunsch_mitschueler" rows="4" maxlength="600"></textarea>
+          <textarea name="anmeldung.wunsch_mitschueler" rows="4" maxlength="600" data-optional></textarea>
         </label>
       </fieldset>
 
       <!-- ===================================================== ERKLÄRUNGEN -->
       <fieldset>
         <legend>Erklärungen</legend>
-        <label class="erklaerung"><input type="checkbox" name="anmeldung.vodv_erhalten" value="1">
+        <label class="erklaerung"><input type="checkbox" name="anmeldung.vodv_erhalten" value="1" required>
           <span>Hiermit bestätige ich, dass ich die <a href="https://bass.schule.nrw/101.htm" target="_blank" rel="noopener" title="VO-DV I in der BASS NRW (10-44 Nr. 2.1) – öffnet in neuem Fenster">VO-DV I</a> (Verordnung über die zur Verarbeitung zugelassenen Daten von Schülerinnen, Schülern und Eltern) zur Kenntnis genommen habe.</span></label>
       </fieldset>
 
@@ -261,11 +269,11 @@
         <legend>Einverständniserklärung Kontakt zur Grundschule</legend>
         <p class="hinweis">Um Ihr Kind bei Bedarf zeitnah fördern zu können, würden wir gerne Kontakt zur Grundschule aufnehmen. Unser Ziel ist es, möglichst schnell und zielgenau mit einer etwaigen Förderung starten zu können, damit der Übergang reibungslos erfolgt. Hierfür benötigen wir Ihre Einverständniserklärung.</p>
         <label class="erklaerung"><input type="checkbox" name="anmeldung.grundschule_kontakt" value="1">
-          Ich bin damit einverstanden, dass das MathNat-Gymnasium Kontakt zur Grundschule aufnimmt, damit die Förderung meines Kindes möglichst schnell erfolgen kann.</label>
-        <label class="erklaerung"><input type="checkbox" name="anmeldung.grundschule_hsp" value="1">
+          Ich bin damit einverstanden, dass das Math-Nat-Gymnasium Kontakt zur Grundschule aufnimmt, damit die Förderung meines Kindes möglichst schnell erfolgen kann.</label>
+        <label class="erklaerung"><input type="checkbox" name="anmeldung.grundschule_hsp" value="1" data-optional>
           In diesem Zusammenhang darf die Grundschule die Ergebnisse der Hamburger Schreib-Probe (HSP) weitergeben.</label>
         <label class="erklaerung"><input type="checkbox" name="anmeldung.grundschule_kontakt" value="0">
-          Ich möchte nicht, dass das MathNat-Gymnasium Kontakt zur Grundschule aufnimmt.</label>
+          Ich möchte nicht, dass das Math-Nat-Gymnasium Kontakt zur Grundschule aufnimmt.</label>
       </fieldset>
 
       <!-- ===================================================== nur Klasse 5 -->
@@ -276,8 +284,8 @@
         <h3>Erklärung</h3>
         <p>Ich bin darüber informiert, dass mit dieser Anmeldung noch nicht über die Aufnahme meines Kindes an dieser Schule entschieden ist. Für den Fall, dass mein Kind an dieser Schule aus Kapazitätsgründen nicht aufgenommen werden kann, bin ich damit einverstanden, dass meine Anmeldung an nachfolgende Wunschschulen weitergeleitet werden:</p>
         <div class="raster">
-          <label>1. Wunschschule (Name der Schule) <input name="anmeldung.wunschschule_1"></label>
-          <label>2. Wunschschule (Name der Schule) <input name="anmeldung.wunschschule_2"></label>
+          <label>1. Wunschschule (Name der Schule) <input name="anmeldung.wunschschule_1" data-optional></label>
+          <label>2. Wunschschule (Name der Schule) <input name="anmeldung.wunschschule_2" data-optional></label>
         </div>
         <p>Mir ist bekannt, dass ich ohne Angabe eines Zweitwunsches im Falle einer Nichtaufnahme meines Kindes gemeinsam mit dem „Nichtaufnahmebescheid“ der Schule auch den Anmeldeschein zurückerhalte und eine nochmalige Anmeldung meines Kindes an einer noch aufnahmefähigen Schule vornehmen muss.</p>
       </fieldset>

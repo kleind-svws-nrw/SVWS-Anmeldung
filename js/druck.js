@@ -42,6 +42,9 @@ function zeile(hoehe, zellen, klasse = '') {
   return `<div class="z ${klasse}" style="height:${hoehe}mm">${html}</div>`;
 }
 
+// Logo relativ zu dieser Datei auflösen, damit der Druck auch aus admin/ heraus funktioniert
+const LOGO = new URL('../img/logo.png', import.meta.url).href;
+
 /** Ganztagsangebote und die Tage, an denen sie angeboten werden (wie im Formular) */
 const GANZTAG_TAGE = { MINT: ['Di'], Bilingual: ['Di'], Hausaufgabenbetreuung: ['Mo', 'Di', 'Do'] };
 
@@ -55,7 +58,7 @@ function seite(nr, inhalt) {
     <header>
       <p class="schule">Städt. Mathematisch-Naturwissenschaftliches Gymnasium</p>
       <p class="titel">A N M E L D U N G</p>
-      <img src="img/logo.png" alt="">
+      <img src="${LOGO}" alt="">
     </header>
     ${inhalt}
     <footer>Seite ${nr} von 3</footer>
@@ -78,14 +81,15 @@ function tabelleSchueler(d, ms) {
     zeile(7.8, [[T.a, lv('PLZ, Wohnort:', [a.plz, a.wohnort].filter(Boolean).join(' '))], [T.d, lv('Ortsteil:', a.ortsteil)]]),
     zeile(8.2, [[T.a, lv('Geburtsdatum:', datum(a.geburtsdatum))], [T.d, lv('Geburtsort:', a.geburtsort)]]),
     zeile(6.4, [[T.a, lv('Staatsangehörigkeit(en):', a.staatsangehoerigkeit)], [T.d, lv('Geburtsland:', a.geburtsland)]]),
+    zeile(6.4, [[T.a, `<b>Geschlecht:</b>`], [38.7, `${kb(a.geschlecht === 'm')} <b>männlich</b>`], [59.3, `${kb(a.geschlecht === 'w')} <b>weiblich</b>`],
+      [79.3, `${kb(a.geschlecht === 'd')} <b>divers</b>`], [97.3, `${kb(a.geschlecht === 'x')} <b>ohne Angabe</b>`]]),
     zeile(7.2, [[T.a, `<b>Religionszugehörigkeit:</b>`], [38.7, `${rel('ev')} <b>evangelisch</b>`], [59.3, `${rel('kath')} <b>katholisch</b>`],
       [79.3, `${rel('islam')} <b>islamisch</b>`], [97.3, `${rel('ohne')} <b>ohne Bekenntnis</b>`],
       [125.7, `${rel('sonstige')}<span class="linie" style="width:43.4mm">${esc(a.religion_sonstige)}</span>`]]),
     zeile(8.1, [[T.a, `<b>Teilnahme&nbsp; am Religionsunterricht:</b>`], [T.d, `${ru('ev')} <b>evangelisch</b>`], [T.f, `${ru('kath')} <b>katholisch</b>`], [T.h, `${ru('pp')} <b>Praktische Philosophie</b>`]]),
     // Ganztag nur Stufe 5–6, Fremdsprache ab Stufe 7, Wahlpflichtfach ab Stufe 9 (wie im Formular)
     stufe > 6 ? '' : `<div class="z ganztag" style="height:19.9mm">
-      <div class="t" style="left:${T.a}mm;top:.85mm"><b>Teilnahmewunsch am Ganztag:</b></div>
-      <div class="t" style="left:${T.i - 0.38}mm;top:.85mm">${kb(a.ganztag_teilnahme === '0')} <b>Keine Teilnahme</b></div>
+      <div class="t" style="left:${T.a}mm;top:.85mm"><b>Teilnahmewunsch am Ganztag:</b><span style="margin-left:3mm">${kb(a.ganztag_teilnahme === '0')} <b>Keine Teilnahme</b></span></div>
       <div class="t" style="left:51.3mm;top:4.45mm"><b>Montag</b></div>
       <div class="t" style="left:76.5mm;top:4.45mm"><b>Dienstag</b></div>
       <div class="t" style="left:101.4mm;top:4.45mm"><b>Donnerstag</b></div>
@@ -149,15 +153,14 @@ function tabelleRest(d, ms) {
     zeile(8.0, [[T.a, lv('Geburtsland der Mutter:', a.geburtsland_mutter)], [T.e, lv('Geburtsland des Vaters:', a.geburtsland_vater)]]),
     zeile(8.0, [[T.a, lv('Muttersprache des Kindes:', a.muttersprache)], [T.e, lv('In der Familie gesprochene Sprache:', a.familiensprache)]]),
     kopf('DATEN ZUR SCHULLAUFBAHN', 7.1),
-    zeile(7.9, [[T.a, lv('Einschulungsjahr Grundschule:', a.einschulungsjahr)]]),
-    // letzte Schule nur bei Quereinstieg (MS); bei Kl. 5 wird der Platz dem Freitext „Sonstige Informationen“ zugeschlagen
+    zeile(7.9, [[T.a, lv('Einschulungsjahr Grundschule:', a.einschulungsjahr)], [T.e, lv('Name der letzten Schule:', a.letzte_schule)]]),
+    // Schulform/Entlassjahrgang der letzten Schule nur bei Quereinstieg (MS); bei Kl. 5 bekommt der Freitext „Sonstige Informationen“ den Platz
     ...(ms ? [
       zeile(7.9, [[T.a, lv('Schulform der letzten Schule:', a.letzte_schulform)], [T.f, lv('Entlassjahrgang:', a.entlassjahrgang)]]),
-      zeile(7.9, [[T.a, lv('Name der letzten Schule:', a.letzte_schule)]]),
     ] : []),
     zeile(6.4, [[T.a, lv('Name der Klassenlehrkraft:', a.klassenlehrkraft)]]),
     `<div class="z ueberg" style="height:10.7mm">
-      <div class="t" style="left:${T.a}mm;top:1.8mm"><b>Übergangsempfehlung:</b></div>
+      <div class="t" style="left:${T.a}mm;top:1.8mm"><b>Übergangsempfehlung<br>der Grundschule:</b></div>
       <div class="t" style="left:${T.c - 0.18}mm;top:1.8mm">${ue('GY')} <b>Gymnasium</b></div>
       <div class="t" style="left:${T.e - 0.41}mm;top:1.8mm">${ue('RS_GY_eing')} <b>Realschule/Gymnasium eingeschränkt</b></div>
       <div class="t" style="left:${T.c - 0.18}mm;top:5.8mm">${ue('RS')} <b>Realschule</b></div>
@@ -169,7 +172,7 @@ function tabelleRest(d, ms) {
     `<div class="z fliess" style="height:10mm"><p class="normal">${kb(a.kenntnis_digitale_kommunikation === '1')} Ich habe zur Kenntnis genommen, dass Lehrkräfte mit meinem Kind digital kommunizieren und Informationen per Schulmessenger (aktuell WebUntis), über das Pädagogische Netz und per E-Mail austauschen.</p></div>`,
     `<div class="z fliess" style="height:8.6mm"><p class="normal">${kb(a.kenntnis_elterninfo_messenger === '1')} Ich habe zur Kenntnis genommen, dass Elterninformationen weitestgehend über den Schulmessenger (aktuell WebUntis) verschickt werden.</p></div>`,
     kopf(`SONSTIGE INFORMATIONEN ${fn(4)}`, 8.0, -0.47),
-    `<div class="z freitext" style="height:${ms ? 57.8 : 41.0}mm"><p>${esc(a.sonstige_informationen)}</p></div>`,
+    `<div class="z freitext" style="height:${ms ? 65.7 : 41.0}mm"><p>${esc(a.sonstige_informationen)}</p></div>`,
     kopf('GEWÜNSCHTE MITSCHÜLERINNEN ODER MITSCHÜLER, WEITERE BEMERKUNGEN', 7.1),
     ms ? '' : `<div class="z freitext" style="height:36.3mm"><p>${esc(a.wunsch_mitschueler)}</p></div>`,
   ].join('');
@@ -190,9 +193,9 @@ function grundschule(d) {
   return `<div class="grundschule">
     <p class="titel">Einverständniserklärung Kontakt zur Grundschule</p>
     <p>Um Ihr Kind bei Bedarf zeitnah fördern zu können, würden wir gerne Kontakt zur Grundschule aufnehmen. Unser Ziel ist es, möglichst schnell und zielgenau mit einer etwaigen Förderung starten zu können, damit der Übergang reibungslos erfolgt. Hierfür benötigen wir Ihre Einverständniserklärung.</p>
-    <p class="kasten">${kb(a.grundschule_kontakt === '1')} Ich bin damit einverstanden, dass das MathNat-Gymnasium Kontakt zur Grundschule aufnimmt, damit die Förderung meines Kindes möglichst schnell erfolgen kann.</p>
+    <p class="kasten">${kb(a.grundschule_kontakt === '1')} Ich bin damit einverstanden, dass das Math-Nat-Gymnasium Kontakt zur Grundschule aufnimmt, damit die Förderung meines Kindes möglichst schnell erfolgen kann.</p>
     <p class="kasten">${kb(a.grundschule_hsp === '1')} In diesem Zusammenhang darf die Grundschule die Ergebnisse der Hamburger Schreib-Probe (HSP) weitergeben.</p>
-    <p class="kasten">${kb(a.grundschule_kontakt === '0')} Ich möchte nicht, dass das MathNat-Gymnasium Kontakt zur Grundschule aufnimmt.</p>
+    <p class="kasten">${kb(a.grundschule_kontakt === '0')} Ich möchte nicht, dass das Math-Nat-Gymnasium Kontakt zur Grundschule aufnimmt.</p>
   </div>`;
 }
 
@@ -202,7 +205,7 @@ function unterschrift({ top, links, ortStrich, datumX, sigX, sigBreite, bezTop =
     <div class="ort">Mönchengladbach, den<span class="strich" style="width:${ortStrich}mm"></span></div>
     <div class="sig" style="left:${sigX}mm"><span class="strich" style="width:${sigBreite}mm"></span></div>
     <div class="bez" style="left:${datumX}mm;top:${bezTop}mm">Datum</div>
-    <div class="bez" style="left:${sigX}mm;top:${bezTop}mm">Unterschrift(en) Erziehungsberechtigten</div>
+    <div class="bez" style="left:${sigX}mm;top:${bezTop}mm">Unterschrift der Erziehungsberechtigten</div>
   </div>`;
 }
 
@@ -227,7 +230,7 @@ function fussnoten(top) {
     <p>${fn(1)} Nach § 5 Abs. 2 SchfkVO NRW entstehen notwendige Schülerfahrkosten, wenn die einfache Entfernung zwischen Wohnung und Schule folgende Grenzen überschreitet: <b>3,5 km bei Sekundarstufe I</b> .<br>Es zählt grundsätzlich der kürzeste Fußweg zur nächstgelegenen Schule der besuchten Schulform.</p>
     <p>${fn(2)} Nur angeben, falls die Anschrift abweichend von den Angaben der Schülerin/des Schülers ist. Basierend auf § 120 SchulG NRW dienen diese Angaben ausschließlich zur schulischen Kommunikation.</p>
     <p>${fn(3)} z. B. Großmutter, Großvater etc.</p>
-    <p>${fn(4)}&nbsp; z.B.&nbsp; Hinweise auf Behinderungen, gesundheitliche Einschränkungen, Probleme im häuslichen Umfeld</p>
+    <p>${fn(4)}&nbsp; z.B.&nbsp; Hinweise auf Behinderungen, Förderbedarf, gesundheitliche Einschränkungen, Probleme im häuslichen Umfeld</p>
   </div>`;
 }
 

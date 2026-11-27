@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-const SCHEMA_VERSION = 5;
+const SCHEMA_VERSION = 6;
 
 /**
  * Liefert eine PDO-Verbindung zur SQLite-Datenbank.
@@ -67,7 +67,10 @@ function migrate(PDO $pdo): void
         if ($version < 5) {
             $pdo->exec('ALTER TABLE anmeldung ADD COLUMN kenntnis_elterninfo_messenger INTEGER CHECK (kenntnis_elterninfo_messenger IN (0,1))');
         }
-        // Spätere Migrationen hier anhängen: if ($version < 6) { ... }
+        if ($version < 6) {
+            $pdo->exec("ALTER TABLE anmeldung ADD COLUMN geschlecht TEXT CHECK (geschlecht IN ('m','w','d','x'))");
+        }
+        // Spätere Migrationen hier anhängen: if ($version < 7) { ... }
     }
     $pdo->exec('PRAGMA user_version = ' . SCHEMA_VERSION);
 }

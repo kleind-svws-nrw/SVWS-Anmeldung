@@ -1,5 +1,10 @@
 // Dünner Wrapper um api.php – einzige Stelle, an der das Frontend mit dem Server spricht.
-const API_URL = 'api.php';
+let API_URL = 'api.php';
+
+/** Nachbearbeitung durch das Sekretariat: Aufrufe gehen an die passwortgeschützte admin/api.php */
+export function setzeApiUrl(url) {
+  API_URL = url;
+}
 
 export async function api(action, { method = 'GET', body, params = {}, adminKey } = {}) {
   const url = new URL(API_URL, location.href);

@@ -10,9 +10,11 @@
  *   GET    anmeldungen          Verwaltung   Liste (Filter: formular, status)
  *   GET    anmeldung&id=…       Verwaltung   eine Anmeldung inkl. Unterdaten
  *   PATCH  anmeldung&id=…       Verwaltung   Status/Sekretariatsfelder ändern
+ *   PUT    anmeldung&id=…       Verwaltung   alle Formularangaben ersetzen (Nachbearbeitung)
  *   DELETE anmeldung&id=…       Verwaltung   löschen (inkl. Unterdaten)
  *
- * Verwaltung: Header "X-Admin-Key: <admin_key aus lib/config.local.php>"
+ * Verwaltung: über admin/api.php (Passwortschutz des Ordners admin/)
+ *             oder Header "X-Admin-Key: <admin_key aus lib/config.local.php>"
  */
 declare(strict_types=1);
 
@@ -25,6 +27,8 @@ header('Cache-Control: no-store');
 
 // Felder, die Eltern nicht selbst setzen dürfen
 const NUR_SEKRETARIAT = ['id', 'status', 'masernschutz_nachweis', 'bemerkung_sekretariat', 'created_at', 'updated_at'];
+// Spalten früherer Formularfassungen: bleiben bei der Nachbearbeitung unverändert
+const VERALTETE_SPALTEN = ['teilnahme_profil', 'einwilligung_digitale_kommunikation', 'kenntnis_email_webuntis'];
 
 try {
     $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -51,6 +55,11 @@ try {
             anmeldungVerwalten($pdo, idParam(), jsonBody());
             respond(['ok' => true]);
 
+        case 'PUT anmeldung':
+            requireAdmin($config);
+            anmeldungAktualisieren($pdo, idParam(), jsonBody());
+            respond(['ok' => true]);
+
         case 'DELETE anmeldung':
             requireAdmin($config);
             $stmt = $pdo->prepare('DELETE FROM anmeldung WHERE id = ?');
@@ -73,6 +82,62 @@ try {
 // ---------------------------------------------------------------- Aktionen
 
 function anmeldungAnlegen(PDO $pdo, array $in): int
+{
+    $a = anmeldungPruefen($in);
+    $a['anmeldedatum'] ??= date('Y-m-d');
+
+    $pdo->beginTransaction();
+    try {
+        $id = insert($pdo, 'anmeldung', $a, NUR_SEKRETARIAT);
+        unterdatenSpeichern($pdo, $id, $in);
+        $pdo->commit();
+        return $id;
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        if ($e instanceof PDOException && str_contains($e->getMessage(), 'CHECK constraint')) {
+            throw new ApiError(422, 'Ungültiger Wert in den Eingaben');
+        }
+        throw $e;
+    }
+}
+
+/**
+ * Nachbearbeitung durch das Sekretariat (nur Verwaltung): ersetzt alle Formularangaben einer Anmeldung.
+ * Sekretariatsfelder (Status, Masernschutz, Bemerkung) und Felder früherer Formularfassungen bleiben unverändert.
+ */
+function anmeldungAktualisieren(PDO $pdo, int $id, array $in): void
+{
+    $a = anmeldungPruefen($in);
+    $spalten = array_diff(columns($pdo, 'anmeldung'), NUR_SEKRETARIAT, VERALTETE_SPALTEN);
+    $werte = [];
+    foreach ($spalten as $s) {
+        $v = $a[$s] ?? null;
+        $werte[$s] = ($v === '' ? null : $v);   // im Formular geleerte Felder werden geleert
+    }
+    $pdo->beginTransaction();
+    try {
+        $set  = implode(', ', array_map(fn($c) => "$c = :$c", array_keys($werte)));
+        $stmt = $pdo->prepare("UPDATE anmeldung SET $set WHERE id = :id");
+        $stmt->execute($werte + ['id' => $id]);
+        if ($stmt->rowCount() === 0) {
+            throw new ApiError(404, 'Anmeldung nicht gefunden');
+        }
+        foreach (['erziehungsberechtigter', 'notfallkontakt', 'ganztag_wunsch'] as $t) {
+            $pdo->prepare("DELETE FROM $t WHERE anmeldung_id = ?")->execute([$id]);
+        }
+        unterdatenSpeichern($pdo, $id, $in);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        if ($e instanceof PDOException && str_contains($e->getMessage(), 'CHECK constraint')) {
+            throw new ApiError(422, 'Ungültiger Wert in den Eingaben');
+        }
+        throw $e;
+    }
+}
+
+/** Prüft die Formulardaten; liefert die Spaltenwerte für die Tabelle anmeldung (ohne Sekretariatsfelder). */
+function anmeldungPruefen(array $in): array
 {
     $a = $in['anmeldung'] ?? [];
     $a['formular'] = $in['formular'] ?? null;
@@ -111,34 +176,27 @@ function anmeldungAnlegen(PDO $pdo, array $in): int
     if ($fehler) {
         throw new ApiError(422, 'Eingaben unvollständig', $fehler);
     }
-    $a['anmeldedatum'] ??= date('Y-m-d');
+    return $a;
+}
 
-    $pdo->beginTransaction();
-    try {
-        $id = insert($pdo, 'anmeldung', $a, NUR_SEKRETARIAT);
-
-        foreach (array_slice($in['erziehungsberechtigte'] ?? [], 0, 2) as $i => $eb) {
-            if (!array_filter((array) $eb, fn($v) => $v !== '' && $v !== null)) {
-                continue; // leere Spalte (z. B. nur ein Elternteil angegeben)
-            }
-            insert($pdo, 'erziehungsberechtigter', ['anmeldung_id' => $id, 'position' => $i + 1] + $eb);
+/** Erziehungsberechtigte, Notfallkontakte und Ganztagswünsche zu einer Anmeldung speichern. */
+function unterdatenSpeichern(PDO $pdo, int $id, array $in): void
+{
+    foreach (array_slice($in['erziehungsberechtigte'] ?? [], 0, 2) as $i => $eb) {
+        if (!array_filter((array) $eb, fn($v) => $v !== '' && $v !== null)) {
+            continue; // leere Spalte (z. B. nur ein Elternteil angegeben)
         }
-        foreach (array_slice($in['notfallkontakte'] ?? [], 0, 2) as $nk) {
-            if (!empty($nk['name'])) {
-                insert($pdo, 'notfallkontakt', ['anmeldung_id' => $id] + $nk);
-            }
+        unset($eb['id'], $eb['anmeldung_id'], $eb['position']);
+        insert($pdo, 'erziehungsberechtigter', ['anmeldung_id' => $id, 'position' => $i + 1] + $eb);
+    }
+    foreach (array_slice($in['notfallkontakte'] ?? [], 0, 2) as $nk) {
+        if (!empty($nk['name'])) {
+            unset($nk['id'], $nk['anmeldung_id']);
+            insert($pdo, 'notfallkontakt', ['anmeldung_id' => $id] + $nk);
         }
-        foreach ($in['ganztag'] ?? [] as $gt) {
-            insert($pdo, 'ganztag_wunsch', ['anmeldung_id' => $id] + $gt, []);
-        }
-        $pdo->commit();
-        return $id;
-    } catch (Throwable $e) {
-        $pdo->rollBack();
-        if ($e instanceof PDOException && str_contains($e->getMessage(), 'CHECK constraint')) {
-            throw new ApiError(422, 'Ungültiger Wert in den Eingaben');
-        }
-        throw $e;
+    }
+    foreach ($in['ganztag'] ?? [] as $gt) {
+        insert($pdo, 'ganztag_wunsch', ['anmeldung_id' => $id, 'angebot' => $gt['angebot'] ?? null, 'tag' => $gt['tag'] ?? null], []);
     }
 }
 
@@ -219,6 +277,15 @@ function idParam(): int
 
 function requireAdmin(array $config): void
 {
+    // Aufruf über admin/api.php: Zugang regelt der Passwortschutz des Webservers (.htaccess bzw. nginx auth_basic).
+    // Ohne vom Server bestätigten Benutzer wird abgelehnt – falls der Schutz einmal nicht greift, bleiben die Daten zu.
+    if (defined('ADMIN_BEREICH')) {
+        $benutzer = $_SERVER['REMOTE_USER'] ?? $_SERVER['REDIRECT_REMOTE_USER'] ?? '';
+        if ($benutzer === '') {
+            throw new ApiError(401, 'Der Verwaltungsbereich ist nicht durch ein Passwort geschützt – Webserver-Konfiguration prüfen (siehe README)');
+        }
+        return;
+    }
     $key = $_SERVER['HTTP_X_ADMIN_KEY'] ?? '';
     if ($config['admin_key'] === '' || !hash_equals($config['admin_key'], $key)) {
         throw new ApiError(401, 'Nicht berechtigt');

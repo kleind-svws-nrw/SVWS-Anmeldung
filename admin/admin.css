@@ -1,0 +1,51 @@
+/* Verwaltungsbereich – ergänzt ../css/style.css */
+main, .seitenkopf { max-width: 75rem; }
+.knopf { text-decoration: none; padding: .45rem .9rem; border: 1px solid var(--rand); border-radius: 3px; color: var(--akzent); background: #fff; font-size: .9rem; }
+
+.filter { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .75rem 1rem; background: #fff; border: 1.5px solid #000; padding: .8rem 1rem; margin-bottom: 1rem; }
+.filter label { min-width: 11rem; }
+.filter label:first-child { flex: 1 1 16rem; }
+.anzahl { margin: 0 0 .4rem; font-size: .85rem; color: #555; }
+
+.tabellenrahmen { background: #fff; border: 1.5px solid #000; max-height: 26rem; overflow: auto; margin-bottom: 1.5rem; }
+#liste { width: 100%; border-collapse: collapse; font-size: .9rem; }
+#liste th { position: sticky; top: 0; background: var(--kopf); color: var(--akzent); text-align: left; padding: .45rem .6rem; border-bottom: 1.5px solid #000; }
+#liste td { padding: .4rem .6rem; border-bottom: 1px solid #e3e6ea; }
+#liste tbody tr { cursor: pointer; }
+#liste tbody tr:hover { background: #f0f4f8; }
+#liste tbody tr.aktiv { background: #dfe9f3; }
+#liste .leer td { cursor: default; color: #666; text-align: center; padding: 1.5rem; }
+
+.marke { display: inline-block; padding: .1rem .5rem; border-radius: 1rem; font-size: .8rem; background: #e3e6ea; white-space: nowrap; }
+.marke.eingegangen { background: #fff3cd; }
+.marke.in_bearbeitung { background: #d8e8f8; }
+.marke.aufgenommen { background: #d4edda; }
+.marke.abgelehnt { background: #f8d7da; }
+.marke.weitergeleitet { background: #e2dcf3; }
+
+.detailkopf { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .6rem; margin-bottom: .8rem; }
+.detailkopf h2 { margin: 0; font-size: 1.2rem; }
+.detailkopf .aktionen { margin: 0; }
+button.gefahr { background: var(--fehler); border-color: var(--fehler); color: #fff; }
+.gruppe.ohne-linie { border-top: 0; padding: 0; }
+#sekretariat button[type=submit] { margin-top: .3rem; }
+
+.vorschau-kopf { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .6rem 1rem; margin: 1.5rem 0 .6rem; }
+.vorschau-kopf .aktionen { margin: 0; }
+.vorschau-titel { margin: 0; font-size: 1rem; }
+.bogen { background: #8a8f96; padding: 6mm 0; overflow-x: auto; font-family: Arial, "Liberation Sans", Helvetica, sans-serif; color: #232A32; }
+.bogen, .bogen * { box-sizing: border-box; }
+.bogen .seite { margin: 0 auto 6mm; box-shadow: 0 2px 10px rgba(0,0,0,.35); }
+
+.export { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .6rem 1rem; background: #fff; border: 1.5px solid #000; padding: .7rem 1rem; margin-bottom: 1rem; }
+.export strong { align-self: center; }
+.export #auswahl-anzahl { align-self: center; color: #555; font-size: .9rem; margin-right: auto; }
+.export label { min-width: 10rem; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+#liste th.auswahl, #liste td.auswahl { width: 2.2rem; text-align: center; }
+#liste td.auswahl input { cursor: pointer; }
+
+.vorschau-titel { display: flex; align-items: center; gap: .8rem; }
+.stift { display: inline-flex; align-items: center; gap: .3rem; font-size: .85rem; font-weight: bold; color: var(--akzent);
+  text-decoration: none; border: 1.5px solid var(--akzent); border-radius: 3px; padding: .25rem .6rem; background: #fff; }
+.stift:hover { background: var(--akzent); color: #fff; }

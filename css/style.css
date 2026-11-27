@@ -64,3 +64,10 @@ button.zweitrangig { background: #fff; color: var(--akzent); border: 1.5px solid
 .status:empty { display: none; }
 .status.ok { color: var(--ok); }
 .status.fehler { color: var(--fehler); }
+.status.gespeichert { color: #c25400; font-weight: bold; font-size: 1.15rem; }
+button:disabled, button:disabled:hover { background: #b9bfc5; border-color: #b9bfc5; color: #f4f5f6; cursor: not-allowed; }
+
+/* Pflichtfelder: nach dem ersten Absendeversuch bzw. Bearbeiten rot markieren */
+input:user-invalid, select:user-invalid, textarea:user-invalid { border-color: #c0392b; outline-color: #c0392b; }
+form.geprueft input:invalid, form.geprueft select:invalid, form.geprueft textarea:invalid { border-color: #c0392b; }
+form.geprueft input[type=checkbox]:invalid, form.geprueft input[type=radio]:invalid { outline: 2px solid #c0392b; outline-offset: 1px; }

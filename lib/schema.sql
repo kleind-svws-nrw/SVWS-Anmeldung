@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS anmeldung (
     wohnort                 TEXT,
     ortsteil                TEXT,
     geburtsdatum            TEXT NOT NULL,
+    geschlecht              TEXT CHECK (geschlecht IN ('m','w','d','x')),
     geburtsort              TEXT,
     geburtsland             TEXT,
     staatsangehoerigkeit    TEXT,          -- mehrere kommasepariert

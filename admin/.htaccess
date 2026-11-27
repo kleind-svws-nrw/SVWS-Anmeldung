@@ -1,0 +1,21 @@
+# Passwortschutz für den Verwaltungsbereich (Apache)
+#
+# 1. Passwortdatei AUSSERHALB des Web-Ordners anlegen (Benutzer "sekretariat", weitere ohne -c):
+#      sudo htpasswd -c /etc/apache2/svws-anmeldung.htpasswd sekretariat
+# 2. Apache muss .htaccess-Dateien auswerten, z. B. in der vHost-/apache2.conf:
+#      <Directory /var/www/html/SVWS-Anmeldung>
+#          AllowOverride AuthConfig Limit
+#      </Directory>
+#    danach: sudo systemctl reload apache2
+#
+# Hinter nginx gilt diese Datei nicht – dort auth_basic verwenden (siehe README).
+
+AuthType Basic
+AuthName "SVWS-Anmeldung - Verwaltung"
+AuthUserFile /etc/apache2/svws-anmeldung.htpasswd
+Require valid-user
+
+# Keine Zwischenspeicherung personenbezogener Seiten
+<IfModule mod_headers.c>
+    Header set Cache-Control "no-store"
+</IfModule>

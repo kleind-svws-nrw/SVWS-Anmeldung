@@ -1,7 +1,11 @@
-import { api } from './api.js?v=20261124-3';
-import { renderDruck } from './druck.js?v=20261124-3';
+import { api, setzeApiUrl } from './api.js?v=20261127-6';
+import { renderDruck } from './druck.js?v=20261127-6';
 
 const form = document.getElementById('anmeldeformular');
+
+// Nachbearbeitung durch das Sekretariat: index.html?bearbeiten=<Nr.> (aus dem Verwaltungsbereich)
+const BEARBEITEN_ID = Number(new URLSearchParams(location.search).get('bearbeiten')) || null;
+if (BEARBEITEN_ID) setzeApiUrl('admin/api.php');
 const meldung = document.getElementById('meldung');
 
 // ---------------------------------------------------------------- Aufbau
@@ -12,6 +16,28 @@ for (const i of [0, 1]) {
   const html = vorlage.innerHTML.replaceAll('{i}', i).replaceAll('{n}', i + 1);
   vorlage.insertAdjacentHTML('beforebegin', html);
 }
+
+// ---------------------------------------------------------------- Pflichtfelder
+// Grundsatz: alles ist Pflicht. Ausgenommen sind
+//   - Felder/Abschnitte mit data-optional (z. B. Notfallinformationen, Telefon/E-Mail der Erziehungsberechtigten),
+//   - Erziehungsberechtigte/r 2: erst Pflicht, sobald dort etwas eingetragen ist,
+//   - Ankreuz-Gruppen: dort prüft je eine eigene Regel „mindestens eine Auswahl“ (siehe unten),
+//   - deaktivierte/ausgeblendete Felder (werden vom Browser ohnehin nicht geprüft).
+const EB2 = () => form.querySelectorAll('.eb')[1];
+for (const el of form.elements) {
+  if (!el.name || ['hidden', 'submit', 'button', 'checkbox'].includes(el.type)) continue;
+  if (el.closest('[data-optional]') || el.hasAttribute('data-optional')) continue;
+  el.required = true;
+  if (EB2().contains(el)) el.dataset.pflichtWennAusgefuellt = '';
+}
+function aktualisiereEB2() {
+  const felder = [...EB2().querySelectorAll('input')];
+  const ausgefuellt = felder.some((f) => (f.type === 'radio' ? f.checked : f.value.trim() !== ''));
+  for (const f of felder) if (f.dataset.pflichtWennAusgefuellt !== undefined) f.required = ausgefuellt;
+}
+form.addEventListener('input', (e) => { if (EB2().contains(e.target)) aktualisiereEB2(); });
+form.addEventListener('change', (e) => { if (EB2().contains(e.target)) aktualisiereEB2(); });
+aktualisiereEB2();
 
 // Anmeldedatum vorbelegen
 if (!form.elements['anmeldung.anmeldedatum'].value) {
@@ -123,6 +149,8 @@ function aktualisiereGanztag(ausloeser) {
     t.disabled = aus || keine.disabled;
   }
   document.getElementById('ganztag-tabelle').classList.toggle('ausgegraut', aus);
+  const fehlt = !keine.disabled && !keine.checked && !tage.some((t) => t.checked);
+  keine.setCustomValidity(fehlt ? 'Bitte mindestens ein Ganztagsangebot oder „Keine Teilnahme“ ankreuzen.' : '');
 }
 
 // Kontakt zur Grundschule (nur Kl. 5): „einverstanden“ und „nicht einverstanden“ schließen sich aus,
@@ -131,15 +159,16 @@ function aktualisiereGrundschule(ausloeser) {
   const ja = form.querySelector('input[name="anmeldung.grundschule_kontakt"][value="1"]');
   const nein = form.querySelector('input[name="anmeldung.grundschule_kontakt"][value="0"]');
   const hsp = form.elements['anmeldung.grundschule_hsp'];
-  if (!ausloeser.checked) {
+  if (ausloeser && !ausloeser.checked) {
     if (ausloeser === ja) hsp.checked = false;
-    return;
-  }
-  if (ausloeser === nein) ja.checked = hsp.checked = false;
-  else {
+  } else if (ausloeser === nein) ja.checked = hsp.checked = false;
+  else if (ausloeser) {
     nein.checked = false;
     if (ausloeser === hsp) ja.checked = true;
   }
+  // Pflicht: entweder Einverständnis oder ausdrücklich „nicht einverstanden“ (Erklärung der Eltern –
+  // bei der Nachbearbeitung durch das Sekretariat nicht erzwungen)
+  ja.setCustomValidity(!BEARBEITEN_ID && !ja.checked && !nein.checked ? 'Bitte ankreuzen, ob das Math-Nat-Gymnasium Kontakt zur Grundschule aufnehmen darf.' : '');
 }
 
 // Migrationshintergrund „nein“: Detailangaben ausgrauen. Deaktivierte Felder werden nicht gespeichert;
@@ -164,6 +193,7 @@ aktualisiereFormulartyp();
 if (new URLSearchParams(location.search).has('vorschau')) document.body.classList.add('vorschau');
 aktualisiereAbhaengige();
 aktualisiereMigration();
+aktualisiereGrundschule();
 
 // ---------------------------------------------------------------- Drucken
 
@@ -172,15 +202,92 @@ document.getElementById('drucken').addEventListener('click', () => window.print(
 window.addEventListener('beforeprint', () => renderDruck(formularDaten(form)));
 renderDruck(formularDaten(form));
 
+// ---------------------------------------------------------------- Nachbearbeitung durch das Sekretariat
+
+if (BEARBEITEN_ID) starteBearbeitung(BEARBEITEN_ID);
+
+async function starteBearbeitung(id) {
+  document.body.classList.add('bearbeitung');
+  // „Zurück“ vor „Drucken / PDF“: führt zur Anmeldung in der Verwaltung zurück
+  const zurueck = Object.assign(document.createElement('button'), { type: 'button', className: 'zweitrangig', textContent: 'Zurück' });
+  zurueck.addEventListener('click', () => { location.href = `admin/?id=${id}`; });
+  document.getElementById('drucken').before(zurueck);
+  form.querySelector('button[type="submit"]').textContent = 'Änderungen speichern';
+  // Erklärungen und Kenntnisnahmen geben die Eltern ab – das Sekretariat muss sie nicht ankreuzen
+  for (const box of form.querySelectorAll('.erklaerung input[type="checkbox"]')) box.required = false;
+  try {
+    const { daten } = await api('anmeldung', { params: { id } });
+    befuelle(daten);
+  } catch (e) {
+    setStatus('meldung', `Anmeldung Nr. ${id} konnte nicht geladen werden: ${e.message}`, 'fehler');
+    form.querySelector('button[type="submit"]').disabled = true;
+  }
+}
+
+/** Gespeicherte Anmeldung (Datenbankzeile) in die Eingabemaske übernehmen */
+function befuelle(a) {
+  const setze = (name, wert) => {
+    if (wert === null || wert === undefined) return;
+    const w = String(wert);
+    for (const el of form.querySelectorAll(`[name="${CSS.escape(name)}"]`)) {
+      if (el.type === 'radio' || el.type === 'checkbox') el.checked = el.value === w;
+      else el.value = w;
+    }
+  };
+  const { erziehungsberechtigte = [], notfallkontakte = [], ganztag = [], ...anmeldung } = a;
+  setze('anmeldung.jahrgangsstufe', anmeldung.jahrgangsstufe);
+  for (const [k, v] of Object.entries(anmeldung)) if (k !== 'jahrgangsstufe') setze(`anmeldung.${k}`, v);
+  for (const e of erziehungsberechtigte) {
+    const i = Number(e.position) - 1;
+    for (const [k, v] of Object.entries(e)) if (!['id', 'anmeldung_id', 'position'].includes(k)) setze(`erziehungsberechtigte.${i}.${k}`, v);
+  }
+  notfallkontakte.forEach((n, i) => {
+    for (const [k, v] of Object.entries(n)) if (!['id', 'anmeldung_id'].includes(k)) setze(`notfallkontakte.${i}.${k}`, v);
+  });
+  const gewaehlt = new Set(ganztag.map((g) => `${g.angebot}:${g.tag}`));
+  for (const el of form.querySelectorAll('input[name="ganztag"]')) el.checked = gewaehlt.has(el.value);
+  form.elements.ganztag_keine.checked = String(a.ganztag_teilnahme) === '0';
+  form.elements.teilnahme_keine.checked = String(a.teilnahme_mint) === '0' && String(a.teilnahme_bilingual) === '0';
+
+  aktualisiereFormulartyp();
+  aktualisiereAbhaengige();
+  setze('anmeldung.religion_sonstige', a.religion_sonstige);
+  aktualisiereMigration();
+  aktualisiereGrundschule();
+  aktualisiereEB2();
+  for (const feld of form.querySelectorAll('[data-jahr]')) pruefeJahr(feld);
+  renderDruck(formularDaten(form));
+}
+
 // ---------------------------------------------------------------- Absenden
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  if (!form.reportValidity()) return;
+  form.classList.add('geprueft');
+  if (!form.reportValidity()) {
+    setStatus('meldung', 'Bitte die rot markierten Angaben ergänzen.', 'fehler');
+    return;
+  }
+  // Absende-Knopf sperren: verhindert doppelte Anmeldungen (auch bei Doppelklick während des Speicherns)
+  const absenden = form.querySelector('button[type="submit"]');
+  absenden.disabled = true;
+  if (BEARBEITEN_ID) {
+    try {
+      await api('anmeldung', { method: 'PUT', params: { id: BEARBEITEN_ID }, body: formularDaten(form) });
+      setStatus('meldung', `Änderungen an Anmeldung Nr. ${BEARBEITEN_ID} gespeichert.`, 'gespeichert');
+    } catch (err) {
+      const details = Object.entries(err.details).map(([f, m]) => `${f}: ${m}`).join(', ');
+      setStatus('meldung', `${err.message}${details ? ` (${details})` : ''}`, 'fehler');
+    } finally {
+      absenden.disabled = false; // bei der Nachbearbeitung mehrfach speicherbar
+    }
+    return;
+  }
   try {
-    const { id } = await api('anmeldung', { method: 'POST', body: formularDaten(form) });
-    setStatus('meldung', `Anmeldung gespeichert (Nr. ${id}). Vielen Dank! Sie können den Bogen jetzt noch ausdrucken.`, 'ok');
+    await api('anmeldung', { method: 'POST', body: formularDaten(form) });
+    setStatus('meldung', 'Anmeldung gespeichert. Vielen Dank! Sie können den Bogen jetzt noch ausdrucken.', 'gespeichert');
   } catch (err) {
+    absenden.disabled = false; // nur bei Fehler wieder freigeben
     const details = Object.entries(err.details).map(([f, m]) => `${f}: ${m}`).join(', ');
     setStatus('meldung', `${err.message}${details ? ` (${details})` : ''}`, 'fehler');
   }
